@@ -4,7 +4,8 @@ L.Control.LayersTreeControl = L.Control.extend({
 		expand: false,
 		className: "leaflet-layers-tree-control",
 		layersTree: {},
-		openByDefault: false
+		openByDefault: false,
+		layerBuilders: {}
 	},
 	initialize: function (options) {
 		L.Util.setOptions(this, options);
@@ -122,7 +123,9 @@ L.Control.LayersTreeControl = L.Control.extend({
 				var layers = this.layers;
 				for (var i = layers.length - 1; i > -1; i--) {
 					var layerContainer = layers[i];
-					layerContainer.layer.setZIndex(i);
+					if (layerContainer.layer.setZIndex != undefined) {
+						layerContainer.layer.setZIndex(i);
+					}
 					var row = L.DomUtil.create("div", className + "-order-row", this.orderContainer);
 					var rowContent = L.DomUtil.create("div", className + "-order-row-content", row);
 					var label = L.DomUtil.create("label", "", rowContent);
@@ -399,20 +402,6 @@ L.Control.LayersTreeControl = L.Control.extend({
 				var layer = L.tileLayer(layerSettings.params.url, {});
 				this._addLayer(layer, layerId, layerSettings);
 				break;
-/*
-			case "BING":
-				var layer = new L.BingLayer(layerSettings.params.url);
-				this._addLayer(layer, layerId, layerSettings);
-				break;
-			case "GOOGLE":
-				layer = new L.Google();
-				this.addLayer(layer, layerId, layerSettings);
-				break;
-			case "GOOGLE_TERRAIN":
-				var layer = new L.Google("TERRAIN");
-				this._addLayer(layer, layerId, layerSettings);
-				break;
-*/
 			case "WMS":
 			{
 				var params = this.copyParams(layerSettings, /\burl\b/gi);
@@ -456,6 +445,10 @@ L.Control.LayersTreeControl = L.Control.extend({
 			}
 				break;
 			default:
+				if (this.options.layerBuilders != undefined && this.options.layerBuilders != null && this.options.layerBuilders.hasOwnProperty(layerSettings.serviceType)) {
+					var layer = this.options.layerBuilders[layerSettings.serviceType](layerSettings);
+					this._addLayer(layer, layerId, layerSettings);
+				}
 				break;
 		}
 	},

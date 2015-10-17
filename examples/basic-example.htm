@@ -240,7 +240,25 @@
 			"serviceType": "WFS",
 			"params": {}
 		}];
-	new L.Control.LayersTreeControl({layersTree: tree, openByDefault: true}).addTo(map);
+
+	var layerBuilders = {
+/*
+		BING: function (layerSettings) {
+		    return new L.BingLayer(layerSettings.params.url);
+		},
+		GOOGLE: function (layerSettings) {
+		    return new L.Google();
+		},
+		GOOGLE_TERRAIN: function (layerSettings) {
+		    return new L.Google("TERRAIN");
+		}
+*/
+	};
+
+	new L.Control.LayersTreeControl({	layersTree: tree,
+						openByDefault: true,
+						layerBuilders: layerBuilders
+					}).addTo(map);
 </script>
 </body>
 </html>
