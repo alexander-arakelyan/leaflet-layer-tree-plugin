@@ -1,0 +1,163 @@
+.leaflet-layers-tree-control {
+	/*
+	width: calc(100% - 25px);
+	width: -moz-calc(100% - 25px);
+	width: -o-calc(100% - 25px);
+	*/
+	/* width: 50%; */
+}
+
+.leaflet-layers-tree-control-leaf-title input {
+	vertical-align: middle;
+}
+
+.leaflet-layers-tree-control-layers-open {
+	padding: 3px 9px 5px 9px;
+}
+
+.leaflet-layers-tree-control-layers-closed {
+	display: none;
+}
+
+.leaflet-layers-tree-control-leaf-header,
+.leaflet-layers-tree-control-leaf-header input,
+.leaflet-layers-tree-control-leaf-header label {
+	display: inline-flex;
+}
+
+.leaflet-layers-tree-control-leaf-header label {
+	cursor: pointer;
+	margin: 0px 0px 1px 0px;
+}
+
+.leaflet-layers-tree-control-leaf-header input {
+	margin-right: 5px;
+	margin-top: 0px;
+}
+
+.leaflet-layers-tree-control-leaf-content {
+	padding-left: 10px;
+}
+
+.leaflet-layers-tree-control-leaf-switcher {
+	padding-left: 5px;
+	cursor: pointer;
+	vertical-align: bottom;
+}
+
+.leaflet-layers-tree-control-leaf-switcher-open:before {
+	font-family: 'Glyphicons Halflings';
+	content: "\e260";
+}
+
+.leaflet-layers-tree-control-leaf-switcher-closed:before {
+	font-family: 'Glyphicons Halflings';
+	content: "\e259";
+}
+
+/* Toggle iconify */
+.leaflet-layers-tree-control-toggle-open {
+	position: absolute;
+	left: -39px;
+	top: 0px;
+	cursor: pointer;
+	width: 36px;
+	height: 36px;
+}
+
+.leaflet-layers-tree-control-toggle-closed {
+	cursor: pointer;
+	width: 36px;
+	height: 36px;
+}
+
+.leaflet-layers-tree-control-toggle-open .leaflet-layers-tree-control-toggle-link {
+	background-image: url('../../../bower_components/leaflet/dist/images/layers.png');
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 100%;
+	height: 100%;
+}
+
+.leaflet-layers-tree-control-toggle-closed .leaflet-layers-tree-control-toggle-link {
+	background-image: url('../../../bower_components/leaflet/dist/images/layers.png');
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 100%;
+	height: 100%;
+}
+
+/* Toggle order */
+.leaflet-layers-tree-control-order-toggle-open {
+	position: absolute;
+	left: -39px;
+	top: 39px;
+	cursor: pointer;
+	width: 36px;
+	height: 36px;
+}
+
+.leaflet-layers-tree-control-order-toggle-closed {
+	position: absolute;
+	left: -39px;
+	top: 39px;
+	cursor: pointer;
+	width: 36px;
+	height: 36px;
+}
+
+.leaflet-layers-tree-control-order-toggle-hidden {
+	display: none;
+}
+
+.leaflet-layers-tree-control-order-toggle-open .leaflet-layers-tree-control-order-toggle-link {
+	background-image: url('../../../bower_components/leaflet/dist/images/layers.png');
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 100%;
+	height: 100%;
+}
+
+.leaflet-layers-tree-control-order-toggle-closed .leaflet-layers-tree-control-order-toggle-link {
+	background-image: url('../../../bower_components/leaflet/dist/images/layers.png');
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 100%;
+	height: 100%;
+}
+
+.leaflet-layers-tree-control-order-open {
+	padding: 3px 9px 5px 9px;
+}
+
+.leaflet-layers-tree-control-order-closed {
+	display: none;
+}
+
+.leaflet-layers-tree-control-order-row {
+}
+
+.leaflet-layers-tree-control-order-row-content {
+	display: inline-flex;
+}
+
+.leaflet-layers-tree-control-order-up {
+	cursor: pointer;
+	padding-left: 5px;
+}
+
+.leaflet-layers-tree-control-order-up:before {
+	font-family: 'Glyphicons Halflings';
+	content: "\e094";
+}
+
+.leaflet-layers-tree-control-order-down {
+	cursor: pointer;
+	padding-left: 5px;
+}
+
+.leaflet-layers-tree-control-order-down:before {
+	font-family: 'Glyphicons Halflings';
+	content: "\e093";
+}
+
