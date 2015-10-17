@@ -21,4 +21,5 @@ The list of layers to be displayed can be provided as a JavaScript object where 
 </code>
 
 Basic usage: https://github.com/bambrikii/leaflet-layers-tree-plugin/blob/master/examples/basic-example.htm
+
 Preview: http://htmlpreview.github.io/?https://github.com/bambrikii/leaflet-layers-tree-plugin/blob/master/examples/basic-example.htm
