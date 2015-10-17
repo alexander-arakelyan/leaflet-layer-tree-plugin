@@ -1,15 +1,15 @@
-L.Control.LayersTreeControl = L.Control.extend({
+L.Control.LayerTreeControl = L.Control.extend({
 	options: {
 		position: "topright",
 		expand: false,
-		className: "leaflet-layers-tree-control",
-		layersTree: {},
+		className: "leaflet-layer-tree-control",
+		layerTree: {},
 		openByDefault: false,
 		layerBuilders: {}
 	},
 	initialize: function (options) {
 		L.Util.setOptions(this, options);
-		if (options.layersTree == undefined) {
+		if (options.layerTree == undefined) {
 			throw Error("Layer tree required to display");
 		}
 		this._layers = new Array();
@@ -365,14 +365,14 @@ L.Control.LayersTreeControl = L.Control.extend({
 			}
 		}
 
-		var layersTree = this.options.layersTree;
-		if (Object.prototype.toString.call(layersTree) === '[object Array]') {
-			for (var i in layersTree) {
-				var layerTree = layersTree[i];
-				traverseLeaf(layerTree, layersContainer, layerTree, "", 0);
+		var layerTree = this.options.layerTree;
+		if (Object.prototype.toString.call(layerTree) === '[object Array]') {
+			for (var i in layerTree) {
+				var layerSubTree = layerTree[i];
+				traverseLeaf(layerSubTree, layersContainer, layerSubTree, "", 0);
 			}
 		} else {
-			traverseLeaf(layersTree, layersContainer, layersTree, "", 0);
+			traverseLeaf(layerTree, layersContainer, layerTree, "", 0);
 		}
 
 		orderManager.fillOrders();

@@ -13,8 +13,8 @@
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css"/>
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
 
-	<link rel="stylesheet" href="../src/leaflet-layers-tree-control.css"/>
-	<script type="text/javascript" src="../src/leaflet-layers-tree-control.js"></script>
+	<link rel="stylesheet" href="../src/leaflet-layer-tree-control.css"/>
+	<script type="text/javascript" src="../src/leaflet-layer-tree-control.js"></script>
 
 </head>
 <body>
@@ -255,7 +255,7 @@
 */
 	};
 
-	new L.Control.LayersTreeControl({	layersTree: tree,
+	new L.Control.LayerTreeControl({	layerTree: tree,
 						openByDefault: true,
 						layerBuilders: layerBuilders
 					}).addTo(map);

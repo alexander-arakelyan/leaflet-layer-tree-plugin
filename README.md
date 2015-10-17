@@ -1,6 +1,6 @@
-# leaflet-layers-tree-plugin
+# leaflet-layer-tree-plugin
 
-LeafetLayersTreePlugin
+Leafet.LayerTreePlugin
 
 This plugin for Leaflet allows to switch layers on and off, structure them in a tree-like way
 
@@ -20,6 +20,6 @@ The list of layers to be displayed can be provided as a JavaScript object where 
 			}
 </code>
 
-Basic usage: https://github.com/bambrikii/leaflet-layers-tree-plugin/blob/master/examples/basic-example.htm
+Basic usage: https://github.com/bambrikii/leaflet-layer-tree-plugin/blob/master/examples/basic-example.htm
 
-Preview: http://rawgit.com/bambrikii/leaflet-layers-tree-plugin/master/examples/basic-example.htm
+Preview: http://rawgit.com/bambrikii/leaflet-layer-tree-plugin/master/examples/basic-example.htm
