@@ -1,0 +1,246 @@
+<html>
+<head>
+
+	<meta charset="UTF-8">
+
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+	<!-- bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<!-- jquery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<!-- leaflet -->
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css"/>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+
+	<link rel="stylesheet" href="../src/leaflet-layers-tree-control.css"/>
+	<script type="text/javascript" src="../src/leaflet-layers-tree-control.js"></script>
+
+</head>
+<body>
+<div style="wdith: 100%; height: 100%;">
+	<div id="map1" style="width: 100%; height: 100%;"></div>
+</div>
+<script type="text/javascript">
+	var map = L.map("map1");
+	map.setView(new L.LatLng(0, 0), 1);
+	var tree = [
+		{
+			"code": "3",
+			"name": "Base Layers",
+			"active": true,
+			"selectedByDefault": false,
+			"openByDefault": true,
+			"childLayers": [
+				{
+					"code": "5",
+					"name": "Base Layers Group 1",
+					"active": true,
+					"selectedByDefault": true,
+					"openByDefault": true,
+					"sortOrder": null,
+					"childLayers": [
+						{
+							"code": "rusregister-basemap",
+							"name": "RusRegister Base Layer",
+							"active": true,
+							"selectedByDefault": true,
+							"openByDefault": true,
+							"childLayers": [],
+							"selectType": null,
+							"serviceType": "TILE",
+							"params": {"url": "http://c.maps.rosreestr.ru/arcgis/rest/services/BaseMaps/BaseMap/MapServer/tile/{x}/{y}/{z}"}
+						}, {
+							"code": "osm",
+							"name": "OpenStreetMap",
+							"active": true,
+							"selectedByDefault": true,
+							"openByDefault": true,
+							"sortOrder": null,
+							"childLayers": [],
+							"selectType": null,
+							"serviceType": "OSM",
+							"params": {"url": "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+						}], "selectType": "SINGLE", "serviceType": null, "params": {"123": "123", "333": "333"}
+				}], "selectType": "NONE", "serviceType": "TILE", "params": {}
+		}, {
+			"code": "2",
+			"name": "Overlays 1",
+			"active": true,
+			"selectedByDefault": false,
+			"openByDefault": true,
+			"childLayers": [{
+				"code": "7",
+				"name": "RusRegister Public Cadastral Map",
+				"active": true,
+				"selectedByDefault": true,
+				"openByDefault": true,
+				"childLayers": [{
+					"code": "9",
+					"name": "WFS Layer 9",
+					"active": true,
+					"selectedByDefault": true,
+					"openByDefault": true,
+					"childLayers": [],
+					"selectType": null,
+					"serviceType": "WFS",
+					"params": {}
+				}, {
+					"code": "12",
+					"name": "Layer 12",
+					"active": true,
+					"selectedByDefault": true,
+					"openByDefault": true,
+					"childLayers": [{
+						"code": "13",
+						"name": "SING TILE Layer 13",
+						"active": false,
+						"selectedByDefault": false,
+						"openByDefault": true,
+						"childLayers": [],
+						"selectType": "SINGLE",
+						"serviceType": "TILE",
+						"params": {"123": "123123", "234": "23423424", "3453": "45345345"}
+					}, {
+						"code": "14",
+						"name": "Layer 14",
+						"active": true,
+						"selectedByDefault": true,
+						"openByDefault": true,
+						"sortOrder": null,
+						"childLayers": [],
+						"selectType": null,
+						"serviceType": null,
+						"params": {}
+					}],
+					"selectType": "SINGLE",
+					"serviceType": "WFS",
+					"params": {"234": "55555555234"}
+				}],
+				"selectType": "MULTIPLE",
+				"serviceType": "WMS",
+				"params": {
+					"size": "1024,1024",
+					"f": "image",
+					"format": "PNG32",
+					"dpi": "96",
+					"url": "http://c.maps.rosreestr.ru/arcgis/rest/services/Cadastre/Cadastre/MapServer/export",
+					"transparent": "true"
+				}
+			}, {
+				"code": "10",
+				"name": "Layer 10",
+				"active": true,
+				"selectedByDefault": false,
+				"openByDefault": true,
+				"sortOrder": null,
+				"childLayers": [],
+				"selectType": "MULTIPLE",
+				"serviceType": "OSM",
+				"params": {}
+			}, {
+				"code": "11",
+				"name": "Layer 11",
+				"active": true,
+				"selectedByDefault": false,
+				"openByDefault": true,
+				"sortOrder": null,
+				"childLayers": [],
+				"selectType": "NONE",
+				"serviceType": "TILE",
+				"params": {}
+			}],
+			"selectType": "MULTIPLE",
+			"serviceType": "TILE",
+			"params": {"123": "123", "234": "234234234", "3453": "45345345"}
+		}, {
+			"code": "15",
+			"name": "Layer 1532",
+			"active": true,
+			"selectedByDefault": true,
+			"openByDefault": true,
+			"childLayers": [{
+				"code": "535",
+				"name": "Layer With A Loooooooooooooooong Name",
+				"active": true,
+				"selectedByDefault": false,
+				"openByDefault": true,
+				"sortOrder": null,
+				"childLayers": [{
+					"code": "5345",
+					"name": "34534534",
+					"active": false,
+					"selectedByDefault": false,
+					"openByDefault": true,
+					"childLayers": [],
+					"selectType": null,
+					"serviceType": null,
+					"params": {}
+				}, {
+					"code": "345",
+					"name": "345",
+					"active": false,
+					"selectedByDefault": false,
+					"openByDefault": true,
+					"sortOrder": null,
+					"childLayers": [],
+					"selectType": null,
+					"serviceType": null,
+					"params": {}
+				}, {
+					"code": "33333",
+					"name": "33333333333",
+					"active": false,
+					"selectedByDefault": false,
+					"openByDefault": true,
+					"sortOrder": null,
+					"childLayers": [],
+					"selectType": null,
+					"serviceType": null,
+					"params": {}
+				}, {
+					"code": "657",
+					"name": "567567567",
+					"active": true,
+					"selectedByDefault": false,
+					"openByDefault": true,
+					"sortOrder": null,
+					"childLayers": [{
+						"code": "233",
+						"name": "232323",
+						"active": false,
+						"selectedByDefault": false,
+						"openByDefault": true,
+						"sortOrder": null,
+						"childLayers": [],
+						"selectType": null,
+						"serviceType": null,
+						"params": {}
+					}, {
+						"code": "5445",
+						"name": "4545",
+						"active": false,
+						"selectedByDefault": false,
+						"openByDefault": true,
+						"sortOrder": null,
+						"childLayers": [],
+						"selectType": null,
+						"serviceType": null,
+						"params": {}
+					}],
+					"selectType": null,
+					"serviceType": null,
+					"params": {}
+				}],
+				"selectType": "SINGLE",
+				"serviceType": "TILE",
+				"params": {}
+			}],
+			"selectType": "MULTIPLE",
+			"serviceType": "WFS",
+			"params": {}
+		}];
+	new L.Control.LayersTreeControl({layersTree: tree, openByDefault: true}).addTo(map);
+</script>
+</body>
+</html>

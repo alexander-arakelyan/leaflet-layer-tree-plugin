@@ -399,6 +399,7 @@ L.Control.LayersTreeControl = L.Control.extend({
 				var layer = L.tileLayer(layerSettings.params.url, {});
 				this._addLayer(layer, layerId, layerSettings);
 				break;
+/*
 			case "BING":
 				var layer = new L.BingLayer(layerSettings.params.url);
 				this._addLayer(layer, layerId, layerSettings);
@@ -411,6 +412,7 @@ L.Control.LayersTreeControl = L.Control.extend({
 				var layer = new L.Google("TERRAIN");
 				this._addLayer(layer, layerId, layerSettings);
 				break;
+*/
 			case "WMS":
 			{
 				var params = this.copyParams(layerSettings, /\burl\b/gi);
