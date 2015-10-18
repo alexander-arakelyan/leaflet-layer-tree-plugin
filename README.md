@@ -12,11 +12,12 @@ The list of layers to be displayed can be provided as a JavaScript object where 
 			    "active": true,
 			    "selectedByDefault": true,
 			    "openByDefault": true,
-			    "sortOrder": null,
 			    "childLayers": [],
-			    "selectType": null,
-			    "serviceType": "OSM",
-			    "params": {"url": "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+			    "selectType": "MULTIPLE", // "SINGLE", "NONE"
+			    "serviceType": "OSM", // "TILE", "WMS", "WFS", custom.
+			    "params": {
+				    "url": "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+			    }
 			}
 ```
 
