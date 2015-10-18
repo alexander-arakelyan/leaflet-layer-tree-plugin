@@ -5,7 +5,7 @@ Leafet.LayerTreePlugin
 This plugin for Leaflet allows to switch layers on and off, structure them in a tree-like way
 
 The list of layers to be displayed can be provided as a JavaScript object where each layer may look like as follows:
-```
+```json
 			{
 			    "code": "osm",
 			    "name": "OpenStreetMap",
