@@ -1,6 +1,6 @@
 {
   "name": "leaflet-layer-tree-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Leaflet.LayerTreePlugin",
   "main": "index.js",
   "scripts": {
