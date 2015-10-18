@@ -29,6 +29,13 @@ L.Control.LayerTreeControl = L.Control.extend({
 		var iconifyToggleControl = L.DomUtil.create("div", className + "-toggle-open leaflet-control-layers", container);
 		var icon = L.DomUtil.create("div", className + "-toggle-link", iconifyToggleControl);
 
+		function iconifyLayersContainerToggleButton() {
+			iconifyToggleControl.className = className + "-toggle-closed leaflet-control-layers"
+		}
+		function restoreLayersContainerToggleButton() {
+			iconifyToggleControl.className = className + "-toggle-open leaflet-control-layers"
+		}
+
 		function isLayersContainerOpen() {
 			return layersContainer.classList.contains(className + "-layers-open");
 		}
@@ -56,7 +63,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 
 		// Order
 		var orderContainer = L.DomUtil.create('div', className + '-order-closed leaflet-control-layers', container);
-		var orderToggleControl = L.DomUtil.create("div", className + "-order-toggle-open leaflet-control-layers", container);
+		var orderToggleControl = L.DomUtil.create("div", className + "-order-toggle-closed leaflet-control-layers", container);
 		var order = L.DomUtil.create("div", className + "-order-toggle-link", orderToggleControl);
 
 		function isOrderContainerOpen() {
@@ -92,11 +99,11 @@ L.Control.LayerTreeControl = L.Control.extend({
 			layers: me._layers,
 			toggleOrder: function () {
 				if (isOrderContainerOpen()) {
-					openOrderToggleControl();
+					closeOrderToggleControl();
 					closeOrderContainer();
 					openLayersContainer();
 				} else {
-					closeOrderToggleControl();
+					openOrderToggleControl();
 					openOrderContainer();
 					closeLayersContainer();
 				}
@@ -190,10 +197,12 @@ L.Control.LayerTreeControl = L.Control.extend({
 			if (isLayersContainerOpen() || isOrderContainerOpen()) {
 				closeLayersContainer();
 				closeOrderContainer();
+				iconifyLayersContainerToggleButton();
 				hideOrderToggleControl();
 			} else {
 				openLayersContainer();
 				closeOrderContainer();
+				restoreLayersContainerToggleButton();
 				closeOrderToggleControl();
 			}
 		}
