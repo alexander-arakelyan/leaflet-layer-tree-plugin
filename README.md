@@ -28,8 +28,6 @@ Preview: http://rawgit.com/bambrikii/leaflet-layer-tree-plugin/master/examples/b
 More complex example:
 
 ```json
-{
-  "list": [
     {
       "code": "root",
       "name": "Все слои",
@@ -391,7 +389,5 @@ More complex example:
       "serviceType": null,
       "params": {}
     }
-  ]
-}
 
 ```
