@@ -11,6 +11,10 @@
 	vertical-align: middle;
 }
 
+.leaflet-layer-tree-control-leaf-title label {
+	padding-right: 5px;
+}
+
 .leaflet-layer-tree-control-layers-open {
 	padding: 3px 9px 5px 9px;
 }
@@ -144,22 +148,32 @@
 }
 
 .leaflet-layer-tree-control-order-up {
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAOCAYAAAD0f5bSAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3woUCSIrvqhY3AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAADASURBVCjPzZK9DYNQDIQ/giigeewCJVuwAWIGBqCkp4EREGwABQvQswAl7RNIOFVCEvKjpMqV9p3POtsQEeFLnJ4Vtdakaco8z89V8oBt2yRJEvE8T+I4lnVdHylycCrLkrZtARiGgSzL3q/XdR1FUdwRmqahqqq7mnEJYhxHoihCa32YbJomeZ7j+/4uWpaFMAyZpullYq7rUtc1Sqnd6RZBEFwd+77HcZzPkf90pz8XKaUAsG0by7IOfeOXhz0DCr9xpxM7oJYAAAAASUVORK5CYII=');
+	background-repeat: no-repeat;
+	background-position: center center;
 	cursor: pointer;
-	padding-left: 5px;
-}
-
-.leaflet-layer-tree-control-order-up:before {
-	font-family: 'Glyphicons Halflings';
-	content: "\e094";
+	padding-left: 13px;
+	width: 19px;
+	height: 18px;
 }
 
 .leaflet-layer-tree-control-order-down {
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAOCAYAAAD0f5bSAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3woUCSIS4a3Q1AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAACySURBVCjPzZIrDoQwFEUvY9gAYQWYahrCLqhEdAk1OAwORYLCsDiCYAUlQUIubiZAJ2FQc+RNzvvleSSJH3mdg2makKYppJQwxtyTlmXBuq4AAGvtPenReP8leSQ5DAO01u8DuJBSou/7T6coilCW5VchDEPUdX0dTymFPM8vgu/7aNsWQRC4dyqKAkmSHKSqqiCEOFbiiXmemWUZ4zhm13V0AVc4jiObpuG2bU7Je/KwO6c6jj9T2RMLAAAAAElFTkSuQmCC');
+	background-repeat: no-repeat;
+	background-position: center center;
 	cursor: pointer;
-	padding-left: 5px;
+	padding-left: 13px;
+	width: 19px;
+	height: 18px;
 }
 
-.leaflet-layer-tree-control-order-down:before {
-	font-family: 'Glyphicons Halflings';
-	content: "\e093";
+.leaflet-layer-tree-control-order-row-content label {
+	padding-right: 5px;
 }
 
+.leaflet-layer-tree-control-leaf-wfs-zoom-to {
+	background-color: red;
+	padding: 0px 5px 0px 10px;
+	border-radius: 10px;
+	cursor: pointer;
+}

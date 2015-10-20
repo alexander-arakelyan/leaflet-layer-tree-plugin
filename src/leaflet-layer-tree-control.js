@@ -32,6 +32,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 		function iconifyLayersContainerToggleButton() {
 			iconifyToggleControl.className = className + "-toggle-closed leaflet-control-layers"
 		}
+
 		function restoreLayersContainerToggleButton() {
 			iconifyToggleControl.className = className + "-toggle-open leaflet-control-layers"
 		}
@@ -264,11 +265,13 @@ L.Control.LayerTreeControl = L.Control.extend({
 			}
 			var layerId = parentId + "_" + leaf.code + "_" + order;
 
-			function toggleLayerMULTIPLE(sourceElementId, checked) {
+			function toggleLayerMULTIPLE(sourceElementId, checked, leafTitle) {
 				if (sourceElementId) {
 					// add or remove currently selected layer
 					if (checked) {
-						me.addLayer(leaf, sourceElementId);
+						me.addLayer(leaf, sourceElementId, function (handlerFunction) {
+							handlerFunction(leafTitle);
+						});
 					} else {
 						me.removeLayer(sourceElementId);
 					}
@@ -276,9 +279,11 @@ L.Control.LayerTreeControl = L.Control.extend({
 				}
 			}
 
-			function toggleLayerSINGLE(parentElementId, sourceElementId) {
+			function toggleLayerSINGLE(parentElementId, sourceElementId, leafTitle) {
 				me.removeLayers(parentLeaf, parentElementId);
-				me.addLayer(leaf, sourceElementId);
+				me.addLayer(leaf, sourceElementId, function (handlerFunction) {
+					handlerFunction(leafTitle);
+				});
 				orderManager.fillOrders();
 			}
 
@@ -337,7 +342,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 						labelText.innerHTML = leaf.name;
 						L.DomEvent.on(checkbox, "change", function (event) {
 							var elem = event.srcElement != undefined ? event.srcElement : this;
-							toggleLayerMULTIPLE(elem.id, elem.checked);
+							toggleLayerMULTIPLE(elem.id, elem.checked, leafTitle);
 						});
 						L.DomEvent.on(label, "click", function (event) {
 							var elem = event.srcElement != undefined ? event.srcElement : this;
@@ -351,11 +356,11 @@ L.Control.LayerTreeControl = L.Control.extend({
 								checked = true;
 							}
 							var sourceElementId = checkbox.id;
-							toggleLayerMULTIPLE(sourceElementId, checked);
+							toggleLayerMULTIPLE(sourceElementId, checked, leafTitle);
 						});
 						if (leaf.selectedByDefault) {
 							checkbox.checked = true;
-							toggleLayerMULTIPLE(layerId, true);
+							toggleLayerMULTIPLE(layerId, true, leafTitle);
 						}
 					}
 						break;
@@ -400,8 +405,97 @@ L.Control.LayerTreeControl = L.Control.extend({
 		}
 		return params;
 	},
-	addLayer: function (layerSettings, layerId) {
+	fitWfsBounds: function (layerSettings, map) {
+		var wfsUrl = layerSettings.params.url + L.Util.getParamString({request: "GetCapabilities"});
+		var layerName = layerSettings.params.typeName != undefined ? layerSettings.params.typeName : layerSettings.params.layer;
+		var south, west, north, east;
+		$.ajax({
+			url: wfsUrl,
+			dataType: 'xml',
+			success: function (data) {
+				for (var i in  data.childNodes) {
+					var wfsCapabilities = data.childNodes[i];
+					if (wfsCapabilities.nodeName == "wfs:WFS_Capabilities") {
+						for (var i2 in wfsCapabilities.childNodes) {
+							var featureTypeList = wfsCapabilities.childNodes[i2];
+							if (featureTypeList.nodeName == "FeatureTypeList") {
+								for (var i3 in featureTypeList.childNodes) {
+									var featureType = featureTypeList.childNodes[i3];
+									if (featureType.nodeName == "FeatureType") {
+										var nameTags = featureType.getElementsByTagName("Name");
+										for (var i4 in nameTags) {
+											if (nameTags[i].childNodes[0].data == layerName) {
+												{
+													var lowerCorners = featureType.getElementsByTagName("LowerCorner");
+													var str = lowerCorners[0].childNodes[0].data.split(" ");
+													south = 1 * str[0];
+													west = 1 * str[1];
+												}
+												{
+													var upperCorners = featureType.getElementsByTagName("UpperCorner");
+													var str = upperCorners[0].childNodes[0].data.split(" ");
+													north = 1 * str[0];
+													east = 1 * str[1];
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				if (south && west && north && east) {
+					var southWest = new L.LatLng(south, west);
+					var northEast = new L.LatLng(north, east);
+					var bounds = new L.LatLngBounds(southWest, northEast);
+					map.fitBounds(bounds);
+				}
+			},
+			error: function () {
+				console.error(arguments);
+			}
+		});
+	},
+	addWfsZoomToFeatureButton: function (leafTitle, layerSettings) {
 		var map = this._map;
+		var elems = leafTitle.getElementsByClassName(this.options.className + "-leaf-wfs-zoom-to");
+		if (elems.length == 0) {
+			var handlerButton = L.DomUtil.create("span", this.options.className + "-leaf-wfs-zoom-to", leafTitle);
+			handlerButton.innerHTML = "";
+			var styleString = layerSettings.params.style;
+			if (styleString) {
+				var style = JSON.parse(styleString);
+				for (var key in style) {
+					var value = style [key];
+					switch (key) {
+						case "fillColor":
+							handlerButton.style.backgroundColor = value;
+							break;
+						case "border":
+							handlerButton.style.borderColor = value;
+							break;
+						case "weight":
+							handlerButton.style.borderWidth = "1px";
+							break;
+						case "opacity":
+							handlerButton.style.opacity = value;
+							break;
+						case "dashArray":
+							handlerButton.style.borderStyle = "dashed";
+							break;
+					}
+				}
+			}
+			var me = this;
+			L.DomEvent.on(handlerButton, "click", function (event) {
+				me.fitWfsBounds(layerSettings, map);
+			});
+		}
+	},
+	addLayer: function (layerSettings, layerId, addFeature) {
+		var map = this._map;
+		var me = this;
 		switch (layerSettings.serviceType) {
 			case "OSM":
 				var layer = L.tileLayer(layerSettings.params.url, {});
@@ -449,6 +543,9 @@ L.Control.LayerTreeControl = L.Control.extend({
 					});
 				}
 				wfsHandler();
+				addFeature(function (leafTitle) {
+					me.addWfsZoomToFeatureButton(leafTitle, layerSettings);
+				}, layerSettings);
 				this._reloadHandlers[layerId + "__moveend"] = wfsHandler;
 				map.on("moveend", wfsHandler);
 			}
@@ -500,7 +597,6 @@ L.Control.LayerTreeControl = L.Control.extend({
 		if (this._reloadHandlers.hasOwnProperty(layerId + "__moveend")) {
 			map.off("moveend", this._reloadHandlers[layerId + "__moveend"]);
 			delete this._reloadHandlers[layerId + "__moveend"];
-
 		}
 	}
 })
