@@ -246,7 +246,12 @@
 
 	new L.Control.LayerTreeControl({	layerTree: tree,
 						openByDefault: true,
-						layerBuilders: layerBuilders
+						layerBuilders: layerBuilders,
+						featureBuilders: {
+							WFS: {
+								// zoom: L.Control.LayerTreeControl.WFSZoomFeature
+							    }
+						}
 					}).addTo(map);
 </script>
 </body>
