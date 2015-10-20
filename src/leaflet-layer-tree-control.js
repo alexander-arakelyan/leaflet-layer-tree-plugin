@@ -423,19 +423,30 @@ L.Control.LayerTreeControl = L.Control.extend({
 									var featureType = featureTypeList.childNodes[i3];
 									if (featureType.nodeName == "FeatureType") {
 										var nameTags = featureType.getElementsByTagName("Name");
-										for (var i4 in nameTags) {
-											if (nameTags[i].childNodes[0].data == layerName) {
-												{
-													var lowerCorners = featureType.getElementsByTagName("LowerCorner");
-													var str = lowerCorners[0].childNodes[0].data.split(" ");
-													south = 1 * str[0];
-													west = 1 * str[1];
-												}
-												{
-													var upperCorners = featureType.getElementsByTagName("UpperCorner");
-													var str = upperCorners[0].childNodes[0].data.split(" ");
-													north = 1 * str[0];
-													east = 1 * str[1];
+										if (nameTags[i].childNodes[0].data == layerName) {
+											for (var i4 in featureType.childNodes) {
+												var boundingBox = featureType.childNodes[i4];
+												if (boundingBox.nodeName == "ows:WGS84BoundingBox") {
+													for (var i5 in boundingBox.childNodes) {
+														var corner = boundingBox.childNodes[i5];
+														switch (corner.nodeName) {
+															case "ows:LowerCorner":
+															{
+																var str = corner.childNodes[0].data.split(" ");
+																south = 1 * str[0];
+																west = 1 * str[1];
+
+															}
+																break;
+															case "ows:UpperCorner":
+															{
+																var str = corner.childNodes[0].data.split(" ");
+																north = 1 * str[0];
+																east = 1 * str[1];
+															}
+																break;
+														}
+													}
 												}
 											}
 										}
