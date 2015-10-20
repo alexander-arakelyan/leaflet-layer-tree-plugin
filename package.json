@@ -1,6 +1,6 @@
 {
   "name": "leaflet-layer-tree-plugin",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Leaflet.LayerTreePlugin",
   "main": "index.js",
   "scripts": {
@@ -18,6 +18,9 @@
   ],
   "author": "Alexander Arakelyan",
   "license": "GPL-3.0",
+  "dependencies": {
+    "jquery": ">=1.0.0"
+  },
   "bugs": {
     "url": "https://github.com/bambrikii/leaflet-layer-tree-plugin/issues"
   },

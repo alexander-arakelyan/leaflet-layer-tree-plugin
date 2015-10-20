@@ -40,19 +40,21 @@
 }
 
 .leaflet-layer-tree-control-leaf-switcher {
-	padding-left: 5px;
+	padding-left: 21px;
 	cursor: pointer;
 	vertical-align: bottom;
 }
 
-.leaflet-layer-tree-control-leaf-switcher-open:before {
-	font-family: 'Glyphicons Halflings';
-	content: "\e260";
+.leaflet-layer-tree-control-leaf-switcher-open {
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAJCAYAAADpeqZqAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3woUCDYG1Bu5ywAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAACWSURBVBjTnZHBrcMwDEOpP4wXyATyCNkiGSNLeBOfs0UkwLu8Htu4ufTzSJF4BGQA+lF/T2ZEaF1XRcRzi0nXdeHuLMuCuxMRc4QbKTO177vMTMdxyMy0bZsy85kUEbg7tVYyE4DMpNZ68wAEMMZ4PM7FMcZ73nmekqTWmkoptyWlFLXW9JkTQO/9izArM+m9A2D/+dMLTNHPpRejxnIAAAAASUVORK5CYII=');
+	background-repeat: no-repeat;
+	background-position: center center;
 }
 
-.leaflet-layer-tree-control-leaf-switcher-closed:before {
-	font-family: 'Glyphicons Halflings';
-	content: "\e259";
+.leaflet-layer-tree-control-leaf-switcher-closed {
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAJCAYAAAAGuM1UAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3woUCDQyx5kv/AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAACWSURBVBjTlZHbCcMwDEWvSjcSeA0PlASSGC/gSTShTr/qpi0Uqi9JSPfoYQD6w26SNMbQrz5AY4wZUEqhtUZm8mmZSWuNUgoAN0mqtSoi1Ht/IwHqvSsiVGt9ETKT8zxx90l6Kl9zAHdJMjOt6ypAETEJT+VlWWRmL8J13n3fcXfcneM4vva6X69hZtq2bapd/Vnz7x8eb42jywYyo2wAAAAASUVORK5CYII=');
+	background-repeat: no-repeat;
+	background-position: center center;
 }
 
 /* Toggle iconify */
