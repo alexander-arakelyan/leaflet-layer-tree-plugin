@@ -167,9 +167,9 @@
 
 .leaflet-layer-tree-control-leaf-wfs-zoom-to {
 	background-color: #5560B3;
-	padding: 0px 0px 0px 6px;
-	border-radius: 9px;
+	padding: 0px 5px 0px 6px;
+	border-radius: 8px;
 	cursor: pointer;
-	font-size: 5px;
+	font-size: 9px;
 	vertical-align: middle;
 }
