@@ -282,9 +282,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 
 			function toggleLayerSINGLE(parentElementId, sourceElementId, leafTitle) {
 				me.removeLayers(parentLeaf, parentElementId);
-				me.addLayer(leaf, sourceElementId, function (handlerFunction) {
-					handlerFunction(leafTitle);
-				});
+				me.addLayer(leaf, sourceElementId);
 				orderManager.fillOrders();
 			}
 
