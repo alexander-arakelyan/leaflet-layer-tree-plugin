@@ -143,8 +143,8 @@ L.Control.LayerTreeControl = L.Control.extend({
 					label.innerHTML = layerContainer.name;
 
 					if (i > 0) {
-						var up = L.DomUtil.create("span", className + "-order-up", rowContent);
-						L.DomEvent.on(up, "click", function (event) {
+						var down = L.DomUtil.create("span", className + "-order-down", rowContent);
+						L.DomEvent.on(down, "click", function (event) {
 							var elem = event.currentTarget ? event.currentTarget : this;
 							var layerId = elem.parentElement.layerId;
 							var index = me._getLayerIndex(layerId);
@@ -153,8 +153,8 @@ L.Control.LayerTreeControl = L.Control.extend({
 						});
 					}
 					if (i < layers.length - 1) {
-						var down = L.DomUtil.create("span", className + "-order-down", rowContent);
-						L.DomEvent.on(down, "click", function (event) {
+						var up = L.DomUtil.create("span", className + "-order-up", rowContent);
+						L.DomEvent.on(up, "click", function (event) {
 							var elem = event.currentTarget ? event.currentTarget : this;
 							var layerId = elem.parentElement.layerId;
 							var index = me._getLayerIndex(layerId);
