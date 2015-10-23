@@ -28,16 +28,16 @@ L.Control.LayerTreeControl.WFSZoomFeature = function (leafTitle, layerSettings, 
 																case "ows:LowerCorner":
 																{
 																	var str = corner.childNodes[0].data.split(" ");
-																	south = 1 * str[0];
-																	west = 1 * str[1];
+																	south = 1 * str[1];
+																	west = 1 * str[0];
 
 																}
 																	break;
 																case "ows:UpperCorner":
 																{
 																	var str = corner.childNodes[0].data.split(" ");
-																	north = 1 * str[0];
-																	east = 1 * str[1];
+																	north = 1 * str[1];
+																	east = 1 * str[0];
 																}
 																	break;
 															}
