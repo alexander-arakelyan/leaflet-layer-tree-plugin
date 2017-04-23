@@ -1,28 +1,28 @@
 {
   "name": "leaflet-layer-tree-plugin",
-  "version": "1.0.10",
+  "version": "1.0.12",
   "description": "Leaflet.LayerTreePlugin",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+	"test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bambrikii/leaflet-layer-tree-plugin.git"
+	"type": "git",
+	"url": "git+https://github.com/bambrikii/leaflet-layer-tree-plugin.git"
   },
   "keywords": [
-    "Leaflet",
-    "Plugin",
-    "Layers",
-    "Switcher"
+	"Leaflet",
+	"Plugin",
+	"Layers",
+	"Switcher"
   ],
   "author": "Alexander Arakelyan",
   "license": "GPL-3.0",
   "dependencies": {
-    "jquery": ">=1.0.0"
+	"jquery": ">=1.0.0"
   },
   "bugs": {
-    "url": "https://github.com/bambrikii/leaflet-layer-tree-plugin/issues"
+	"url": "https://github.com/bambrikii/leaflet-layer-tree-plugin/issues"
   },
   "homepage": "https://github.com/bambrikii/leaflet-layer-tree-plugin#readme"
 }
