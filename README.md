@@ -229,3 +229,36 @@ More complex example:
 		}
 	]
 ```
+
+It's possible to use "onPopup" property to define WFS layers in configuration.
+The property value should be a function that accepts "layer" argument and returns html of the popup:
+
+```javascript
+var layer = {
+											code: "adygeaPrevlik",
+											name: "Adygeya:prevlik",
+											active: true,
+											selectedByDefault: true,
+											openByDefault: true,
+											childLayers: [],
+											selectType: "MULTIPLE",
+											serviceType: "WFS",
+											onPopup: function (layer) {
+																			var content = "<table>";
+																			var properties = layer.feature.properties;
+																			for (var i in properties) {
+																				content += "<tr><td>" + i + "</td><td>" + properties[i] + "</td></tr>";
+																			}
+																			content += "</table>";
+																			return content;
+																		},
+											params: {
+												request: "getFeature",
+												service: "WFS",
+												typeName: "Adygeya:prevlik",
+												version: "1.0.0",
+												outputFormat: "application/json",
+												url: "http://geoportal.sovzond.ru:10090/geoserver/Adygeya/wfs"
+											}
+										}
+```
