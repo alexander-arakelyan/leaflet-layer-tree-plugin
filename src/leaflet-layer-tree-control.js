@@ -145,6 +145,16 @@ L.Control.LayerTreeControl = L.Control.extend({
 										layer.setStyle(style);
 									});
 								}
+								var onPopup = layerSettings.onPopup;
+								var getType = {};
+								if (onPopup && getType.toString.call(onPopup) === '[object Function]') {
+									layer.eachLayer(function (layer) {
+										var func = layerSettings.onPopup(layer);
+										if (func) {
+											layer.bindPopup(func);
+										}
+									});
+								}
 							},
 							error: function () {
 								console.error(arguments);
