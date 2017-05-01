@@ -27,6 +27,17 @@
 	<div id="map1" style="width: 100%; height: 100%;"></div>
 </div>
 <script type="text/javascript">
+
+	function buildContentFromLayer(layer) {
+		var content = "<table>";
+		var properties = layer.feature.properties;
+		for (var i in properties) {
+			content += "<tr><td>" + i + "</td><td>" + properties[i] + "</td></tr>";
+		}
+		content += "</table>";
+		return content;
+	}
+
 	var map = L.map("map1");
 	map.setView(new L.LatLng(0, 0), 1);
 
@@ -129,40 +140,46 @@
 					openByDefault: true,
 					childLayers: [
 						{
-							code: "aelectro",
-							name: "Adygeya:elektro",
+							code: "goroda",
+							name: "rtk:Goroda",
 							active: true,
 							selectedByDefault: false,
 							openByDefault: true,
 							selectType: "MULTIPLE",
 							serviceType: "WFS",
+							onPopup: function (layer) {
+								return buildContentFromLayer(layer);
+							},
 							params: {
 								request: "getFeature",
 								service: "WFS",
-								typeName: "Adygeya:elektro",
-								style: "{\"stroke\":true,\"fillColor\":\"green\",\"border\":\"cyan\",\"weight\":2,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"3\",\"fillOpacity\":0.1}",
+								typeName: "rtk:STAT_SUBJ",
+								style: "{\"stroke\":true,\"fillColor\":\"violet\",\"border\":\"orange\",\"weight\":3,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"5\",\"fillOpacity\":0.1}",
 								version: "1.0.0",
 								outputFormat: "application/json",
-								url: "http://geoportal.sovzond.ru:10090/geoserver/Adygeya/wfs",
+								url: "http://geoportal.sovzond.ru:10090/geoserver/rtk/wfs",
 								maxFeatures: "3000"
 							},
 							childLayers: [
 								{
-									code: "goroda",
-									name: "rtk:Goroda",
+									code: "aelectro",
+									name: "Adygeya:elektro",
 									active: true,
 									selectedByDefault: false,
 									openByDefault: true,
 									selectType: "MULTIPLE",
 									serviceType: "WFS",
+									onPopup: function (layer) {
+										return buildContentFromLayer(layer);
+									},
 									params: {
 										request: "getFeature",
 										service: "WFS",
-										typeName: "rtk:STAT_SUBJ",
-										style: "{\"stroke\":true,\"fillColor\":\"violet\",\"border\":\"orange\",\"weight\":3,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"5\",\"fillOpacity\":0.1}",
+										typeName: "Adygeya:elektro",
+										style: "{\"stroke\":true,\"fillColor\":\"green\",\"border\":\"cyan\",\"weight\":3,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"3\",\"fillOpacity\":0.1}",
 										version: "1.0.0",
 										outputFormat: "application/json",
-										url: "http://geoportal.sovzond.ru:10090/geoserver/rtk/wfs",
+										url: "http://geoportal.sovzond.ru:10090/geoserver/Adygeya/wfs",
 										maxFeatures: "3000"
 									},
 									childLayers: [
@@ -175,6 +192,9 @@
 											childLayers: [],
 											selectType: "MULTIPLE",
 											serviceType: "WFS",
+											onPopup: function (layer) {
+												return buildContentFromLayer(layer);
+											},
 											params: {
 												request: "getFeature",
 												service: "WFS",
@@ -196,13 +216,7 @@
 											selectType: "MULTIPLE",
 											serviceType: "WFS",
 											onPopup: function (layer) {
-												var content = "<table>";
-												var properties = layer.feature.properties;
-												for (var i in properties) {
-													content += "<tr><td>" + i + "</td><td>" + properties[i] + "</td></tr>";
-												}
-												content += "</table>";
-												return content;
+												return buildContentFromLayer(layer);
 											},
 											params: {
 												request: "getFeature",
@@ -226,6 +240,9 @@
 							childLayers: [],
 							selectType: "MULTIPLE",
 							serviceType: "WFS",
+							onPopup: function (layer) {
+								return buildContentFromLayer(layer);
+							},
 							params: {
 								request: "getFeature",
 								service: "WFS",
