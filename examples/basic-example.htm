@@ -10,12 +10,12 @@
 	<!-- jquery -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<!-- leaflet -->
-	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css"/>
-	<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+	<link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css"/>
+	<script src="https://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
 
-	<script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
-	<script src="http://rawgit.com/shramov/leaflet-plugins/v1/layer/tile/Google.js"></script>
-	<script src="http://rawgit.com/shramov/leaflet-plugins/v1/layer/tile/Bing.js"></script>
+	<script src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+	<script src="https://rawgit.com/shramov/leaflet-plugins/v1/layer/tile/Google.js"></script>
+	<script src="https://rawgit.com/shramov/leaflet-plugins/v1/layer/tile/Bing.js"></script>
 
 	<link rel="stylesheet" href="../src/leaflet-layer-tree-control.css"/>
 	<script type="text/javascript" src="../src/leaflet-layer-tree-control.js"></script>
@@ -60,31 +60,13 @@
 							code: "osm",
 							name: "OpenStreetMap",
 							active: true,
-							selectedByDefault: true,
+							selectedByDefault: false,
 							openByDefault: true,
 							childLayers: [],
 							selectType: "MULTIPLE",
 							serviceType: "OSM",
 							params: {
 								url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-							}
-						},
-						{
-							code: "topo1-25000",
-							name: "Top Base (vector 1:25000, 1:10000)",
-							active: true,
-							selectedByDefault: false,
-							openByDefault: true,
-							childLayers: [],
-							selectType: "SINGLE",
-							serviceType: "WMS",
-							params: {
-								service: "WMS",
-								format: "image/png",
-								layers: "Adygeya:Adygeya_topo",
-								version: "1.1.1",
-								url: "http://geoportal.sovzond.ru:10090/geoserver/gwc/service/wms",
-								transparent: "TRUE"
 							}
 						},
 						{
@@ -102,30 +84,12 @@
 							code: "google_terrain",
 							name: "Google Terrain",
 							active: true,
-							selectedByDefault: false,
+							selectedByDefault: true,
 							openByDefault: true,
 							childLayers: [],
 							selectType: "NONE",
 							serviceType: "GOOGLE_TERRAIN",
 							params: {}
-						},
-						{
-							code: "rtk",
-							name: "rtk",
-							active: true,
-							selectedByDefault: false,
-							openByDefault: true,
-							selectType: "MULTIPLE",
-							serviceType: "WMS",
-							params: {
-								request: "getMap",
-								service: "WMS",
-								format: "image/png",
-								layers: "rtk:L1622982",
-								style: "{\"stroke\":true,\"fillColor\":\"grey\",\"border\":\"cyan\",\"weight\":1,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"3\",\"fillOpacity\":0.1}",
-								version: "1.1.0",
-								url: "http://geoportal.sovzond.ru:10090/geoserver/rtk/wms"
-							}
 						}
 					],
 					selectType: "SINGLE",
@@ -140,118 +104,124 @@
 					openByDefault: true,
 					childLayers: [
 						{
-							code: "goroda",
-							name: "rtk:Goroda",
+							code: "50m_coastline",
+							name: "rsg:50m_coastline",
 							active: true,
-							selectedByDefault: false,
+							selectedByDefault: true,
 							openByDefault: true,
 							selectType: "MULTIPLE",
 							serviceType: "WFS",
+							coordinateSystem: "EPSG:4326",
 							onPopup: function (layer) {
 								return buildContentFromLayer(layer);
 							},
 							params: {
 								request: "getFeature",
 								service: "WFS",
-								typeName: "rtk:STAT_SUBJ",
+								typeName: "rsg:50m_coastline",
 								style: "{\"stroke\":true,\"fillColor\":\"violet\",\"border\":\"orange\",\"weight\":3,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"5\",\"fillOpacity\":0.1}",
-								version: "1.0.0",
+								version: "1.1.0",
 								outputFormat: "application/json",
-								url: "http://geoportal.sovzond.ru:10090/geoserver/rtk/wfs",
-								maxFeatures: "3000"
+								url: "https://rsg.pml.ac.uk/geoserver/wfs",
+								maxFeatures: "25"
 							},
 							childLayers: [
 								{
-									code: "aelectro",
-									name: "Adygeya:elektro",
+									code: "MPA_SCOTLAND",
+									name: "rsg:MPA_SCOTLAND",
 									active: true,
-									selectedByDefault: false,
+									selectedByDefault: true,
 									openByDefault: true,
+									childLayers: [],
 									selectType: "MULTIPLE",
 									serviceType: "WFS",
+									coordinateSystem: "EPSG:4326",
 									onPopup: function (layer) {
 										return buildContentFromLayer(layer);
 									},
 									params: {
 										request: "getFeature",
 										service: "WFS",
-										typeName: "Adygeya:elektro",
-										style: "{\"stroke\":true,\"fillColor\":\"green\",\"border\":\"cyan\",\"weight\":3,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"3\",\"fillOpacity\":0.1}",
-										version: "1.0.0",
+										typeName: "rsg:MPA_SCOTLAND",
+										style: "{\"stroke\":true,\"fillColor\":\"yellow\",\"border\":\"gray\",\"weight\":3,\"opacity\":0.5,\"color\":\"gray\",\"dashArray\":\"5\",\"fillOpacity\":0.1}",
+										version: "1.1.1",
 										outputFormat: "application/json",
-										url: "http://geoportal.sovzond.ru:10090/geoserver/Adygeya/wfs",
-										maxFeatures: "3000"
+										url: "https://rsg.pml.ac.uk/geoserver/wfs",
+										maxFeatures: "25"
+									}
+								},
+								{
+									code: "MMO_Fish_Shellfish_Cages_A",
+									name: "rsg:MMO_Fish_Shellfish_Cages_A",
+									active: true,
+									selectedByDefault: false,
+									openByDefault: true,
+									childLayers: [],
+									selectType: "MULTIPLE",
+									serviceType: "WFS",
+									coordinateSystem: "EPSG:4326",
+									onPopup: function (layer) {
+										return buildContentFromLayer(layer);
 									},
-									childLayers: [
-										{
-											code: "adygea10",
-											name: "Adygeya:LAYER10_line",
-											active: true,
-											selectedByDefault: false,
-											openByDefault: true,
-											childLayers: [],
-											selectType: "MULTIPLE",
-											serviceType: "WFS",
-											onPopup: function (layer) {
-												return buildContentFromLayer(layer);
-											},
-											params: {
-												request: "getFeature",
-												service: "WFS",
-												typeName: "Adygeya:LAYER10_line",
-												style: "{\"stroke\":true,\"fillColor\":\"yellow\",\"border\":\"red\",\"weight\":3,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"5\",\"fillOpacity\":0.1}",
-												version: "1.0.0",
-												outputFormat: "application/json",
-												url: "http://geoportal.sovzond.ru:10090/geoserver/Adygeya/wfs",
-												maxFeatures: "3000"
-											}
-										},
-										{
-											code: "adygeaPrevlik",
-											name: "Adygeya:prevlik",
-											active: true,
-											selectedByDefault: true,
-											openByDefault: true,
-											childLayers: [],
-											selectType: "MULTIPLE",
-											serviceType: "WFS",
-											onPopup: function (layer) {
-												return buildContentFromLayer(layer);
-											},
-											params: {
-												request: "getFeature",
-												service: "WFS",
-												typeName: "Adygeya:prevlik",
-												version: "1.0.0",
-												outputFormat: "application/json",
-												url: "http://geoportal.sovzond.ru:10090/geoserver/Adygeya/wfs"
-											}
-										}
-									]
+									params: {
+										request: "getFeature",
+										service: "WFS",
+										typeName: "rsg:MMO_Fish_Shellfish_Cages_A",
+										version: "1.1.1",
+										outputFormat: "application/json",
+										url: "https://rsg.pml.ac.uk/geoserver/wfs",
+										maxFeatures: "25"
+									}
 								}
 							]
 						},
 						{
-							code: "citybuilding-info",
-							name: "Urban Planning Information",
+							code: "tiger_roads",
+							name: "tiger:tiger_roads",
 							active: true,
 							selectedByDefault: false,
 							openByDefault: true,
-							childLayers: [],
 							selectType: "MULTIPLE",
 							serviceType: "WFS",
+							coordinateSystem: "EPSG:4326",
 							onPopup: function (layer) {
 								return buildContentFromLayer(layer);
 							},
 							params: {
 								request: "getFeature",
 								service: "WFS",
-								style: "{\"stroke\":true,\"fillColor\":\"violet\",\"border\":\"yellow\",\"weight\":1,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"5\",\"fillOpacity\":0.1}",
-								typeName: "Adygeya:LAYER10_line",
-								version: "1.0.0",
+								typeName: "tiger:tiger_roads",
+								style: "{\"stroke\":true,\"fillColor\":\"green\",\"border\":\"cyan\",\"weight\":3,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"3\",\"fillOpacity\":0.1}",
+								version: "1.1.1",
 								outputFormat: "application/json",
-								url: "http://geoportal.sovzond.ru:10090/geoserver/Adygeya/wfs"
-							}
+								url: "https://rsg.pml.ac.uk/geoserver/wfs",
+								maxFeatures: "25"
+							},
+							childLayers: [
+								{
+									code: "poi",
+									name: "tiger:poi",
+									active: true,
+									selectedByDefault: false,
+									openByDefault: true,
+									childLayers: [],
+									selectType: "MULTIPLE",
+									serviceType: "WFS",
+									coordinateSystem: "EPSG:4326",
+									onPopup: function (layer) {
+										return buildContentFromLayer(layer);
+									},
+									params: {
+										request: "getFeature",
+										service: "WFS",
+										typeName: "tiger:poi",
+										version: "1.1.1",
+										outputFormat: "application/json",
+										url: "https://rsg.pml.ac.uk/geoserver/wfs",
+										maxFeatures: "25"
+									},
+								}
+							]
 						}
 					],
 					selectType: "MULTIPLE",

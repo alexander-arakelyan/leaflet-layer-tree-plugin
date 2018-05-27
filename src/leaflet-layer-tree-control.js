@@ -128,8 +128,12 @@ L.Control.LayerTreeControl = L.Control.extend({
 
 					this._addLayer(layer, layerId, layerSettings);
 					var wfsHandler = function () {
+						var bbox = map.getBounds().toBBoxString();
+						if (layerSettings.coordinateSystem) {
+							bbox += "," + layerSettings.coordinateSystem;
+						}
 						var customParams = {
-							bbox: map.getBounds().toBBoxString(),
+							bbox: bbox,
 						};
 						var params2 = L.Util.extend(params, customParams);
 						var wfsUrl = layerSettings.params.url + L.Util.getParamString(params2);
