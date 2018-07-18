@@ -1,26 +1,25 @@
 <html>
 <head>
-
 	<meta charset="UTF-8">
-
 	<!-- fontawesome -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 	<!-- bootstrap -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<!-- jquery -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<!-- leaflet -->
-	<link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css"/>
-	<script src="https://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.2/dist/leaflet.css"
+		  integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+		  crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.3.2/dist/leaflet.js"
+			integrity="sha512-2fA79E27MOeBgLjmBrtAgM/20clVSV8vJERaW/EcnnWCVGwQRazzKtQS1kIusCZv1PtaQxosDZZ0F1Oastl55w=="
+			crossorigin=""></script>
 
 	<script src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
-	<script src="https://rawgit.com/shramov/leaflet-plugins/v1/layer/tile/Google.js"></script>
-	<script src="https://rawgit.com/shramov/leaflet-plugins/v1/layer/tile/Bing.js"></script>
 
 	<link rel="stylesheet" href="../src/leaflet-layer-tree-control.css"/>
 	<script type="text/javascript" src="../src/leaflet-layer-tree-control.js"></script>
 	<script type="text/javascript" src="../src/leaflet-layer-tree-control-wfs-zoom.js"></script>
-
 </head>
 <body>
 <div style="wdith: 100%; height: 100%;">
@@ -73,7 +72,7 @@
 							code: "google",
 							name: "Google",
 							active: true,
-							selectedByDefault: false,
+							selectedByDefault: true,
 							openByDefault: true,
 							childLayers: [],
 							selectType: "NONE",
@@ -84,7 +83,7 @@
 							code: "google_terrain",
 							name: "Google Terrain",
 							active: true,
-							selectedByDefault: true,
+							selectedByDefault: false,
 							openByDefault: true,
 							childLayers: [],
 							selectType: "NONE",
@@ -236,15 +235,17 @@
 	];
 
 	var layerBuilders = {
-
-		BING: function (layerSettings) {
-			return new L.BingLayer(layerSettings.params.url);
-		},
 		GOOGLE: function (layerSettings) {
-			return new L.Google();
+			return L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+				maxZoom: 20,
+				subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+			});
 		},
 		GOOGLE_TERRAIN: function (layerSettings) {
-			return new L.Google("TERRAIN");
+			return L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+				maxZoom: 20,
+				subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+			});
 		}
 
 	};
