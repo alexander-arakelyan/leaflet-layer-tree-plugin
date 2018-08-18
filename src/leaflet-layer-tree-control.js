@@ -123,10 +123,10 @@ L.Control.LayerTreeControl = L.Control.extend({
 					break;
 				case "WFS":
 				{
-					var layer = new L.GeoJSON().addTo(map);
+					var layers = new L.GeoJSON().addTo(map);
 					var params = this.copyParams(layerSettings, /\b(url|style)\b/gi);
 
-					this._addLayer(layer, layerId, layerSettings);
+					this._addLayer(layers, layerId, layerSettings);
 					var wfsHandler = function () {
 						var bbox = map.getBounds().toBBoxString();
 						if (layerSettings.coordinateSystem) {
@@ -141,18 +141,25 @@ L.Control.LayerTreeControl = L.Control.extend({
 							url: wfsUrl,
 							dataType: 'json',
 							success: function (data) {
-								layer.clearLayers();
-								layer.addData(data);
-								if (layerSettings.params.style) {
-									var style = JSON.parse(layerSettings.params.style);
-									layer.eachLayer(function (layer) {
-										layer.setStyle(style);
+								layers.clearLayers();
+								layers.addData(data);
+								var style = layerSettings.params.style;
+								if (style) {
+									var styleObj = JSON.parse(style);
+									layers.eachLayer(function (layer) {
+										layer.setStyle(styleObj);
+									});
+								}
+								var icon = layerSettings.params.icon;
+								if (icon) {
+									layers.eachLayer(function (layer) {
+										layer.setIcon(icon);
 									});
 								}
 								var onPopup = layerSettings.onPopup;
 								var getType = {};
 								if (onPopup && getType.toString.call(onPopup) === '[object Function]') {
-									layer.eachLayer(function (layer) {
+									layers.eachLayer(function (layer) {
 										var func = layerSettings.onPopup(layer);
 										if (func) {
 											layer.bindPopup(func);
@@ -591,7 +598,6 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 				var sourceId = elem.layerId;
 				var targetId = event.dataTransfer.getData("text/plain");
 				var sourceIndex = me._getLayerIndex(sourceId);
-				//var targetIndex = me._getLayerIndex(targetId);
 				if (sourceIndex != undefined/* && targetIndex != undefined && sourceIndex != targetIndex*/) {
 					event.preventDefault();
 				}

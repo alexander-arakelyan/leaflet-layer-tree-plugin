@@ -29,6 +29,19 @@ Preview: [https://htmlpreview.github.io/?https://github.com/bambrikii/leaflet-la
 More complex example:
 
 ```javascript
+// Preinitialized Icons That Could be Used for Customizing Layers' Markers
+var greenIcon = L.icon({
+    iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png',
+    shadowUrl: 'https://leafletjs.com/examples/custom-icons/leaf-shadow.png',
+
+    iconSize: [38, 95],
+    shadowSize: [50, 64],
+    iconAnchor: [22, 94],
+    shadowAnchor: [4, 62],
+    popupAnchor: [-3, -76]
+});
+
+// The Tree Control Configuration
 [
 		{
 			code: "root",
@@ -206,7 +219,8 @@ More complex example:
 										version: "1.1.1",
 										outputFormat: "application/json",
 										url: "https://rsg.pml.ac.uk/geoserver/wfs",
-										maxFeatures: "25"
+										maxFeatures: "25",
+                                        icon: greenIcon
 									},
 								}
 							]
@@ -224,7 +238,7 @@ More complex example:
 ]
 ```
 
-It's possible to use "onPopup" property to define WFS layers in configuration.
+One can use "onPopup" property to define WFS layers in configuration.
 The property value should be a function that accepts "layer" argument and returns html of the popup:
 
 ```javascript
