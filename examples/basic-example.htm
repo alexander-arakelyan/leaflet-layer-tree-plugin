@@ -2,9 +2,10 @@
 <head>
 	<meta charset="UTF-8">
 	<!-- fontawesome -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"
+		  type="text/css">
 	<!-- bootstrap -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" type="text/css">
 	<!-- jquery -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<!-- leaflet -->
@@ -17,7 +18,7 @@
 
 	<script src="https://maps.google.com/maps/api/js?v=3&sensor=false"></script>
 
-	<link rel="stylesheet" href="../src/leaflet-layer-tree-control.css"/>
+	<link rel="stylesheet" href="../src/leaflet-layer-tree-control.css" type="text/css"/>
 	<script type="text/javascript" src="../src/leaflet-layer-tree-control.js"></script>
 	<script type="text/javascript" src="../src/leaflet-layer-tree-control-wfs-zoom.js"></script>
 </head>
@@ -39,6 +40,18 @@
 
 	var map = L.map("map1");
 	map.setView(new L.LatLng(0, 0), 1);
+
+	// Icons
+	var greenIcon = L.icon({
+		iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png',
+		shadowUrl: 'https://leafletjs.com/examples/custom-icons/leaf-shadow.png',
+
+		iconSize: [38, 95],
+		shadowSize: [50, 64],
+		iconAnchor: [22, 94],
+		shadowAnchor: [4, 62],
+		popupAnchor: [-3, -76]
+	});
 
 	var tree = [
 		{
@@ -201,7 +214,7 @@
 									code: "poi",
 									name: "tiger:poi",
 									active: true,
-									selectedByDefault: false,
+									selectedByDefault: true,
 									openByDefault: true,
 									childLayers: [],
 									selectType: "MULTIPLE",
@@ -217,7 +230,8 @@
 										version: "1.1.1",
 										outputFormat: "application/json",
 										url: "https://rsg.pml.ac.uk/geoserver/wfs",
-										maxFeatures: "25"
+										maxFeatures: "25",
+										icon: greenIcon
 									},
 								}
 							]
@@ -234,6 +248,7 @@
 		}
 	];
 
+	// Base Layers
 	var layerBuilders = {
 		GOOGLE: function (layerSettings) {
 			return L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -250,6 +265,7 @@
 
 	};
 
+	// The Tree Control
 	new L.Control.LayerTreeControl({
 		layerTree: tree,
 		openByDefault: true,
