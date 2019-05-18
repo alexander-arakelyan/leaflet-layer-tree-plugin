@@ -24,7 +24,7 @@ var layer = {
 
 Basic usage: [https://github.com/bambrikii/leaflet-layer-tree-plugin/blob/master/examples/basic-example.htm](https://github.com/bambrikii/leaflet-layer-tree-plugin/blob/master/examples/basic-example.htm)
 
-Preview: [https://htmlpreview.github.io/?https://github.com/bambrikii/leaflet-layer-tree-plugin/blob/master/examples/basic-example.htm](https://htmlpreview.github.io/?https://github.com/bambrikii/leaflet-layer-tree-plugin/blob/master/examples/basic-example.htm)
+Preview: [https://rawgit.com/bambrikii/leaflet-layer-tree-plugin/master/examples/basic-example.htm](https://rawgit.com/bambrikii/leaflet-layer-tree-plugin/master/examples/basic-example.htm)
 
 More complex example:
 
