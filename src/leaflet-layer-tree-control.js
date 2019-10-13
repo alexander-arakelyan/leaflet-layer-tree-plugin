@@ -29,7 +29,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 		container.setAttribute("aria-haspopup", true);
 
 		// Iconify
-		var layersContainer = L.DomUtil.create('div', className + '-layers-open leaflet-control-layers', container);
+		var layersContainer = this._layersContainer = L.DomUtil.create('div', className + '-layers-open leaflet-control-layers', container);
 		var iconifyToggleControl = L.DomUtil.create("div", className + "-toggle-open leaflet-control-layers", container);
 		var icon = L.DomUtil.create("div", className + "-toggle-link", iconifyToggleControl);
 
@@ -42,7 +42,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 		var orderToggleControl = L.DomUtil.create("div", className + "-order-toggle-closed leaflet-control-layers", container);
 		var order = L.DomUtil.create("div", className + "-order-toggle-link", orderToggleControl);
 
-		var orderManager = new LeafletLayerTreeOrderManager(className, orderContainer, orderToggleControl, layersContainer, me, layerManager);
+		var orderManager = this._orderManager = new LeafletLayerTreeOrderManager(className, orderContainer, orderToggleControl, layersContainer, me, layerManager);
 
 		function toggleIconify() {
 			if (layerManager.isLayersContainerOpen() || orderManager.isOrderContainerOpen()) {
@@ -72,17 +72,17 @@ L.Control.LayerTreeControl = L.Control.extend({
 		});
 
 		var childrenVisibilityToggler = new LeafletLayerTreeLayerChildrenVisibilityToggler(className, layerManager);
-		var leafTraverser = new LeafletLayerTreeLeafTraverser(className, childrenVisibilityToggler);
+		var leafTraverser = this._leafTraverser = new LeafletLayerTreeLeafTraverser(me, className, childrenVisibilityToggler, orderManager);
 
 
 		var layerTree = me.options.layerTree;
 		if (Object.prototype.toString.call(layerTree) === '[object Array]') {
 			for (var i in layerTree) {
 				var layerSubTree = layerTree[i];
-				leafTraverser.traverseLeaf(layerSubTree, layersContainer, layerSubTree, "", 0, me, orderManager);
+				leafTraverser.addLeaf(layerSubTree, layersContainer, layerSubTree, "", 0);
 			}
 		} else {
-			leafTraverser.traverseLeaf(layerTree, layersContainer, layerTree, "", 0, me, orderManager);
+			leafTraverser.addLeaf(layerTree, layersContainer, layerTree, "", 0);
 		}
 
 		orderManager.fillOrders();
@@ -101,6 +101,8 @@ L.Control.LayerTreeControl = L.Control.extend({
 		return params;
 	},
 	addLayer: function (layerSettings, layerId) {
+console.log("addLayer()");
+console.log(" - " + layerSettings.name + " (" + layerSettings.code + ", " + layerId + ")")
 		if (!this._layersById.hasOwnProperty(layerId)) {
 			this._layersById[layerId] = true;
 			var map = this._map;
@@ -114,15 +116,13 @@ L.Control.LayerTreeControl = L.Control.extend({
 					var layer = L.tileLayer(layerSettings.params.url, {});
 					this._addLayer(layer, layerId, layerSettings);
 					break;
-				case "WMS":
-				{
+				case "WMS": {
 					var params = this.copyParams(layerSettings, /\burl\b/gi);
 					var layer = L.tileLayer.wms(layerSettings.params.url, params).addTo(map);
 					this._addLayer(layer, layerId, layerSettings);
 				}
 					break;
-				case "WFS":
-				{
+				case "WFS": {
 					var layers = new L.GeoJSON().addTo(map);
 					var params = this.copyParams(layerSettings, /\b(url|style)\b/gi);
 
@@ -195,11 +195,15 @@ L.Control.LayerTreeControl = L.Control.extend({
 		}
 	},
 	removeLayers: function (layer, parentId) {
-		this.removeLayer(layer);
+console.log("removeLayers()#1");
+console.log(" - " + JSON.stringify(layer));
+//		this.removeLayer(layer);
 		if (layer.childLayers && layer.childLayers.length > 0) {
 			for (var i in layer.childLayers) {
 				var child = layer.childLayers[i];
-				this.removeLayer(parentId + "_" + child.code + "_" + i);
+console.log("removeLayers()#2");
+//				this.removeLayer(parentId + "_" + child.code + "_" + i);
+				this.removeLayer(parentId + "_" + child.code + "_0");
 			}
 		}
 	},
@@ -213,6 +217,8 @@ L.Control.LayerTreeControl = L.Control.extend({
 		return undefined;
 	},
 	removeLayer: function (layerId) {
+console.log("removeLayer()");
+console.log(" - " + JSON.stringify(layerId));
 		if (this._layersById.hasOwnProperty(layerId)) {
 			var map = this._map;
 			var layerIndex = this._getLayerIndex(layerId);
@@ -231,6 +237,60 @@ L.Control.LayerTreeControl = L.Control.extend({
 			}
 			delete this._layersById[layerId];
 		}
+	},
+	_findLayerSettings: function (layerCode, arr) {
+		var layerTree = arr ? arr : this.options.layerTree;
+		if (Object.prototype.toString.call(layerTree) === '[object Array]') {
+			for (var i in layerTree) {
+				var layerSubTree = layerTree[i];
+				if (layerSubTree.code == layerCode) {
+					return layerSubTree;
+				}
+				if (layerSubTree.childLayers && layerSubTree.childLayers.length > 0) {
+					var result = this._findLayerSettings(layerCode, layerSubTree.childLayers);
+					if (result) {
+						return result;
+					}
+				}
+			}
+		} else {
+			if (layerSubTree.code == layerCode) {
+				return layerSubTree;
+			}
+			if (layerSubTree.childLayers && layerSubTree.childLayers.length > 0) {
+				var result = this._findLayerSettings(layerCode, layerSubTree.childLayers);
+				if (result) {
+					return result;
+				}
+			}
+		}
+	},
+	addLayer2: function (layerSettings, parentLayerCode) {
+		// find parent layer,
+		var parentSettings = this._findLayerSettings(parentLayerCode);
+		if (!parentSettings) {
+			throw new Error("Parent layer " + parentLayerCode + " cannot be found!");
+		}
+		parentSettings.childLayers.push(layerSettings);
+
+		// find last layer by code
+		var parentContainerHolder = this._leafTraverser.getLastContainerByCode(parentLayerCode);
+console.log("addLayer2()");
+console.log(" - " + layerSettings.name + ", " + parentLayerCode + "." + layerSettings.code);
+
+		var parentLeafId = parentContainerHolder.id;
+		var leafOrder = 0;
+		var content = parentContainerHolder.container.getElementsByClassName(this.options.className + "-leaf-content");
+		if (content.length > 0) {
+			content = content[0];
+		}
+
+		// add layer to parent
+		this._leafTraverser.addLeaf(parentSettings, content, layerSettings, parentLeafId, leafOrder);
+	},
+	removeLayer2: function (layerCode, parentLayerCode) {
+		var layerTree = this._findLayerSettings(layerCode, parentLayerCode);
+		this._leafTraverser.removeLeaf(layerCode);
 	}
 });
 
@@ -384,15 +444,28 @@ function LeafletLayerTreeCheckboxWrapper(className) {
 	}
 }
 
-function LeafletLayerTreeLeafTraverser(className, childrenVisibilityToggler) {
+function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibilityToggler, orderManagerArg) {
 	this.className = className;
 	var checkboxWrapper = LeafletLayerTreeCheckboxWrapper(className);
+	var orderManager = orderManagerArg;
+	var thePlugin = thePluginArg;
+	var containersByCode = new Object()
 	return {
-		traverseLeaf: function (parentLeaf, parentContainer, leaf, parentId, order, me, orderManager) {
+		buildLeafId: function (parentId, leafSettings, order) {
+			return parentId + "_" + leafSettings.code + "_" + order;
+		},
+		getLastContainerByCode: function (code) {
+			var containers = containersByCode[code];
+			if (!containers) {
+				return
+			}
+			return containers[containers.length - 1];
+		},
+		addLeaf: function (parentLeafSettings, parentContainer, leafSettings, parentLeafId, leafOrder) {
 			var leafContainer = L.DomUtil.create("div", className + "-leaf", parentContainer);
 			var leafHeader = L.DomUtil.create("div", className + "-leaf-header", leafContainer);
 			var leafTitle = L.DomUtil.create("span", className + "-leaf-title", leafHeader);
-			if (leaf.childLayers != undefined && leaf.childLayers.length > 0) {
+			{
 				var leafSwitcherRow = L.DomUtil.create("span", className + "-leaf-switcher-row", leafHeader);
 				var leafSwitcher = L.DomUtil.create("span", className + "-leaf-switcher", leafSwitcherRow);
 				L.DomEvent.on(leafSwitcher, "click", function (event) {
@@ -400,29 +473,39 @@ function LeafletLayerTreeLeafTraverser(className, childrenVisibilityToggler) {
 					childrenVisibilityToggler.toggleChildrenVisibility(elem.parentElement.parentElement.parentElement);
 				});
 			}
-			var layerId = parentId + "_" + leaf.code + "_" + order;
+			var leafId = this.buildLeafId(parentLeafId, leafSettings, leafOrder);
+
+			var leafCode = leafSettings.code;
+			if (!containersByCode[leafCode]) {
+				containersByCode[leafCode] = new Array();
+			}
+			containersByCode[leafCode].push({"id": leafId, "container": leafContainer, "order": leafOrder});
 
 			function toggleLayerSINGLE(parentElementId, sourceElementId, leafTitle) {
-				me.removeLayers(parentLeaf, parentElementId);
-				me.addLayer(leaf, sourceElementId);
+console.log("toggleLayerSINGLE()");
+				thePlugin.removeLayers(parentLeafSettings, parentElementId);
+				thePlugin.removeLayer(sourceElementId);
+				thePlugin.addLayer(leafSettings, sourceElementId);
 				orderManager.fillOrders();
 			}
+console.log("addLeaf()");
+console.log(" - " + leafSettings.name + "  (" + parentLeafId + "." + leafSettings.code + ")");
 
-			if (leaf.active) {
-				switch (parentLeaf.selectType) {
+			if (leafSettings.active) {
+				switch (parentLeafSettings.selectType) {
 					case "NONE":	//
-						leafTitle.innerHTML = "<label>" + leaf.name + "</label>"
+						leafTitle.innerHTML = "<label>" + leafSettings.name + "</label>"
 						break;
 					case "SINGLE":	// radio-group
 					{
 						var checkbox = L.DomUtil.create("input", "", leafTitle);
-						checkbox.name = parentLeaf.code;
-						checkbox.id = layerId;
-						checkbox.parentId = parentId;
+						checkbox.name = parentLeafSettings.code;
+						checkbox.id = leafId;
+						checkbox.parentId = parentLeafId;
 						checkbox.type = "radio";
 						var label = L.DomUtil.create("label", "", leafTitle);
 						var labelText = L.DomUtil.create("span", "", label);
-						labelText.innerHTML = leaf.name;
+						labelText.innerHTML = leafSettings.name;
 						L.DomEvent.on(checkbox, "change", function (event) {
 							var elem = event.srcElement != undefined ? event.srcElement : this;
 							var sourceElementId = elem.id;
@@ -442,44 +525,51 @@ function LeafletLayerTreeLeafTraverser(className, childrenVisibilityToggler) {
 							var sourceElementId = checkbox.id;
 							toggleLayerSINGLE(parentElementId, sourceElementId);
 						});
-						if (leaf.selectedByDefault) {
+						if (leafSettings.selectedByDefault) {
 							checkbox.checked = true;
-							toggleLayerSINGLE(parentId, layerId);
+							toggleLayerSINGLE(parentLeafId, leafId);
 						}
 					}
 						break;
 					case "MULTIPLE":
 					default:	// checkboxes
 					{
-						checkboxWrapper.prepare(layerId, parentId,
-							parentLeaf, leafTitle, leaf,
-							me, orderManager
+						checkboxWrapper.prepare(leafId, parentLeafId,
+							parentLeafSettings, leafTitle, leafSettings,
+							thePlugin, orderManager
 						);
-						checkboxWrapper.incrementChildrenCheckbox(parentId, layerId, leaf);
+						checkboxWrapper.incrementChildrenCheckbox(parentLeafId, leafId, leafSettings);
 					}
 						break;
 				}
-				if (me.options.featureBuilders.hasOwnProperty(leaf.serviceType)) {
-					var featureBuilders = me.options.featureBuilders[leaf.serviceType];
+				if (thePlugin.options.featureBuilders.hasOwnProperty(leafSettings.serviceType)) {
+					var featureBuilders = thePlugin.options.featureBuilders[leafSettings.serviceType];
 					for (var i in featureBuilders) {
 						var featureBuilder = featureBuilders[i];
-						featureBuilder(leafTitle, leaf, me.options, me._map);
+						featureBuilder(leafTitle, leafSettings, thePlugin.options, thePlugin._map);
 					}
 				}
 				var leafContent = L.DomUtil.create("div", className + "-leaf-content", leafContainer);
-				if (leaf.childLayers && leaf.childLayers.length > 0) {
-					for (var i in leaf.childLayers) {
-						var child = leaf.childLayers[i];
-						if (child) {
-							this.traverseLeaf(leaf, leafContent, child, layerId, i, me, orderManager);
+				if (leafSettings.childLayers && leafSettings.childLayers.length > 0) {
+					for (var i in leafSettings.childLayers) {
+						var childLeafSettings = leafSettings.childLayers[i];
+						if (childLeafSettings) {
+							this.addLeaf(leafSettings, leafContent, childLeafSettings, leafId, i);
 						}
 					}
 				}
 
-				childrenVisibilityToggler.toggleChildrenVisibility(leafContainer.parentNode.parentNode, parentLeaf.openByDefault);
+				childrenVisibilityToggler.toggleChildrenVisibility(leafContainer.parentNode.parentNode, parentLeafSettings.openByDefault);
+			}
+		},
+		removeLeaf: function (leafId) {
+			if (!containersByCode[leafId]) {
+				return;
+			}
+			if (containersByCode[leafId].length > 0) {
+				containersByCode[leafId].pop();
 			}
 		}
-
 	}
 }
 
@@ -554,6 +644,7 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 	this.fillOrders = function () {
 		orderContainer.innerHTML = "";
 		var layers = me._layers;
+console.log("fillOrders()");
 		for (var i = layers.length - 1; i > -1; i--) {
 			var layerContainer = layers[i];
 			if (layerContainer.layer.setZIndex != undefined) {
@@ -563,7 +654,8 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 			var rowContent = L.DomUtil.create("div", className + "-order-row-content", row);
 			var label = L.DomUtil.create("label", "", rowContent);
 			label.innerHTML = layerContainer.name;
-
+var positionLog = " (" + layerContainer.id + ", " + i + "/" + (layers.length - 1) + ")";
+console.log(" - " + layerContainer.name + positionLog);
 			if (i > 0) {
 				var down = L.DomUtil.create("span", className + "-order-down", rowContent);
 				L.DomEvent.on(down, "click", function (event) {
