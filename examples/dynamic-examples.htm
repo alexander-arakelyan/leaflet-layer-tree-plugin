@@ -59,23 +59,13 @@
 
 	};
 
-	var tree = [
-		{
-			code: "root",
-			name: "All the Layers",
-			active: true,
-			selectedByDefault: false,
-			openByDefault: true,
-			childLayers: [],
-			selectType: "NONE",
-			serviceType: null,
-			params: {}
-		}
+	var rootLayerSettings = [
+
 	];
 
 	// The Tree Control
 	var layerTree = new L.Control.LayerTreeControl({
-		layerTree: tree,
+		// layerTree: rootLayerSettings,
 		openByDefault: true,
 		layerBuilders: layerBuilders,
 		featureBuilders: {
@@ -88,7 +78,19 @@
 
 	function fillWithLayers() {
 
-		layerTree.addLayer2({
+		var rootLayerId = layerTree.addLayer2({
+			code: "root",
+			name: "All the Layers",
+			active: true,
+			selectedByDefault: false,
+			openByDefault: true,
+			childLayers: [],
+			selectType: "NONE",
+			serviceType: null,
+			params: {}
+		});
+
+		var baseLayerId = layerTree.addLayer2({
 			code: "base",
 			name: "Base layers",
 			active: true,
@@ -99,9 +101,9 @@
 			serviceType: null,
 			params: {}
 
-		}, "root");
+		}, rootLayerId);
 
-		layerTree.addLayer2({
+		var overlaysLayerId = layerTree.addLayer2({
 			code: "overlays",
 			name: "Overlays",
 			active: true,
@@ -111,9 +113,9 @@
 			selectType: "MULTIPLE",
 			serviceType: null,
 			params: {}
-		}, "root");
+		}, rootLayerId);
 
-		layerTree.addLayer2({
+		var osmLayerId = layerTree.addLayer2({
 			code: "osm",
 			name: "OpenStreetMap",
 			active: true,
@@ -125,9 +127,9 @@
 			params: {
 				url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 			}
-		}, "base");
+		}, baseLayerId);
 
-		layerTree.addLayer2({
+		var googleLayerId = layerTree.addLayer2({
 			code: "google",
 			name: "Google",
 			active: true,
@@ -137,9 +139,9 @@
 			selectType: "NONE",
 			serviceType: "GOOGLE",
 			params: {}
-		}, "base");
+		}, baseLayerId);
 
-		layerTree.addLayer2({
+		var scotlandLayerId = layerTree.addLayer2({
 			code: "MPA_SCOTLAND",
 			name: "rsg:MPA_SCOTLAND",
 			active: true,
@@ -162,7 +164,7 @@
 				url: "https://rsg.pml.ac.uk/geoserver/wfs",
 				maxFeatures: "25"
 			}
-		}, "overlays");
+		}, overlaysLayerId);
 
 	}
 
