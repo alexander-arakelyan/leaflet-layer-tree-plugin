@@ -28,6 +28,7 @@ L.Control.LayerTreeControl = L.Control.extend({
         this._layers = new Array();
         this._layerSettingsById = {};
         this._layerContainersById = {};
+        this._childLayers = {};
         // this._layersByCode = {};
         this._reloadHandlers = {};
         this._minWidth = undefined;
@@ -118,7 +119,10 @@ L.Control.LayerTreeControl = L.Control.extend({
         return params;
     },
     addLayer : function(layerSettings, layerId) {
-        if (!this._layerSettingsById.hasOwnProperty(layerId)) {
+        console.log("Adding layer [" + layerId + "]");
+        console.log(this._layerSettingsById);
+        console.log(this._layerContainersById);
+//        if (!this._layerSettingsById.hasOwnProperty(layerId)) {
             this._layerSettingsById[layerId] = true;
             var map = this._map;
             var me = this;
@@ -200,9 +204,9 @@ L.Control.LayerTreeControl = L.Control.extend({
                 }
                 break;
             }
-        } else {
-            console.log("Layer " + layerId + " already added. Skipping.");
-        }
+//        } else {
+//            console.log("Layer " + layerId + " already added. Skipping.");
+//        }
     },
     _addLayer : function(layer, layerId, layerSettings) {
         if (layer) {
@@ -215,14 +219,16 @@ L.Control.LayerTreeControl = L.Control.extend({
             this._map.addLayer(layer);
         }
     },
-    removeLayers : function(layer, parentId) {
-        this.removeLayer(layer);
-        if (layer.childLayers && layer.childLayers.length > 0) {
-            for ( var i in layer.childLayers) {
-                var child = layer.childLayers[i];
-                this.removeLayer(parentId + "_" + child.code + "_" + i);
+    removeChildLayers : function(layerId) {
+        console.log("Removing child layers of [" + layerId + "]");
+        if (this._childLayers.hasOwnProperty(layerId)) {
+            var children = this._childLayers[layerId];
+            for ( var childId in children) {
+                this.removeChildLayers(childId);
+                this.removeLayer(childId);
             }
         }
+        this.removeLayer(layerId);
     },
     _getLayerIndex : function(layerId) {
         for ( var i in this._layers) {
@@ -250,7 +256,7 @@ L.Control.LayerTreeControl = L.Control.extend({
                 map.off("moveend", this._reloadHandlers[layerId + "__moveend"]);
                 delete this._reloadHandlers[layerId + "__moveend"];
             }
-            delete this._layerSettingsById[layerId];
+            // delete this._layerSettingsById[layerId];
         }
     },
     addLayer2 : function(layerSettings, parentLayerId) {
@@ -284,6 +290,7 @@ L.Control.LayerTreeControl = L.Control.extend({
         console.log("Adding settings for [" + leafId + "]")
         // console.log(layerSettings);
         this._layerSettingsById[leafId] = layerSettings;
+        this.setChildLayer(leafId, parentLayerId);
         return leafId;
     },
     removeLayer2 : function(layerId) {
@@ -307,6 +314,21 @@ L.Control.LayerTreeControl = L.Control.extend({
         }
         console.log(layerContainer)
         this._layerContainersById[layerId] = layerContainer;
+    },
+    setChildLayer : function(layerId, parentLayerId) {
+        if (!this._childLayers.hasOwnProperty(parentLayerId)) {
+            this._childLayers[parentLayerId] = {};
+        }
+        this._childLayers[parentLayerId][layerId] = {}
+    },
+    removeChildLayer : function(layerId, parentLayerId) {
+        if (!this._childLayers.hasOwnProperty(parentLayerId)) {
+            return;
+        }
+        if (!this._childLayers[parentLayerId].hasOwnProperty(layerId)) {
+            return;
+        }
+        delete this._childLayers[parentLayerId][layerId];
     }
 });
 
@@ -546,7 +568,7 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
         console.log("Leaf SINGLE [" + leafSettings.name + "]");
 
         function toggleLayerSINGLE(parentElementId, sourceElementId, leafTitle) {
-            thePlugin.removeLayers(parentLeafSettings, parentElementId);
+            thePlugin.removeChildLayers(parentElementId);
             thePlugin.addLayer(leafSettings, sourceElementId);
             orderManager.fillOrders();
         }
