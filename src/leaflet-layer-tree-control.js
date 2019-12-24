@@ -3,17 +3,6 @@ L.Control.LayerTreeControl = L.Control.extend({
         position : "topright",
         expand : false,
         className : "leaflet-layer-tree-control",
-        // layerTree: {
-        // code: "root",
-        // name: "All the Layers",
-        // active: true,
-        // selectedByDefault: false,
-        // openByDefault: true,
-        // childLayers: [],
-        // selectType: "NONE",
-        // serviceType: null,
-        // params: {}
-        // },
         openByDefault : false,
         layerBuilders : {},
         featureBuilders : {
@@ -22,14 +11,14 @@ L.Control.LayerTreeControl = L.Control.extend({
     },
     initialize : function(options) {
         L.Util.setOptions(this, options);
-        // if (options.layerTree == undefined) {
-        // throw Error("Layer tree required to display");
-        // }
-        this._layers = new Array();
+        if (options.layerTree != undefined) {
+            this._layerTree = options.layerTree;
+        }
+        // this._layers = new Array();
         this._layerSettingsById = {};
         this._layerContainersById = {};
+        this._layerIndexesById = {};
         this._childLayers = {};
-        // this._layersByCode = {};
         this._reloadHandlers = {};
         this._minWidth = undefined;
     },
@@ -87,24 +76,25 @@ L.Control.LayerTreeControl = L.Control.extend({
         });
 
         var childrenVisibilityToggler = new LeafletLayerTreeLayerChildrenVisibilityToggler(className, layerManager);
-        var leafTraverser = this._leafTraverser = new LeafletLayerTreeLeafTraverser(me, className, childrenVisibilityToggler, orderManager);
-
-        // var layerTree = me.options.layerTree;
-        // if (Object.prototype.toString.call(layerTree) === '[object Array]') {
-        // for (var i in layerTree) {
-        // var layerSubTree = layerTree[i];
-        // var leafId = leafTraverser.addLeaf(layerSubTree, layersContainer,
-        // layerSubTree, "", 0);
-        // this._layerContainersById[leafId] = {};
-        // }
-        // } else {
-        // var leafId = leafTraverser.addLeaf(layerTree, layersContainer,
-        // layerTree, "", 0);
-        // this._layerContainersById[leafId] = {};
-        // }
+        var leafTraverser = this._leafTraverser = new LeafletLayerTreeLeafTraverser(this, className, childrenVisibilityToggler, orderManager);
+        this.processLayerTree(me.options.layerTree, layersContainer, layerManager, orderManager, childrenVisibilityToggler, leafTraverser);
 
         orderManager.fillOrders();
         return container;
+    },
+    processLayerTree : function(layerTree, layersContainer, layerManager, orderManager, childrenVisibilityToggler, leafTraverser) {
+        if (!layerTree) {
+            return;
+        }
+        if (Object.prototype.toString.call(layerTree) === '[object Array]') {
+            for ( var i in layerTree) {
+                var layerSubTree = layerTree[i];
+                leafTraverser.addLeaf(layerSubTree, layersContainer, layerSubTree, "", i, this, orderManager);
+            }
+        } else {
+            leafTraverser.addLeaf(layerTree, layersContainer, layerTree, "", i, this, orderManager);
+        }
+        delete this._layerTree;
     },
     onRemove : function(map) {
 
@@ -120,102 +110,105 @@ L.Control.LayerTreeControl = L.Control.extend({
     },
     addLayer : function(layerSettings, layerId) {
         console.log("Adding layer [" + layerId + "]");
-        console.log(this._layerSettingsById);
-        console.log(this._layerContainersById);
-//        if (!this._layerSettingsById.hasOwnProperty(layerId)) {
-            this._layerSettingsById[layerId] = true;
-            var map = this._map;
-            var me = this;
-            switch (layerSettings.serviceType) {
-            case "OSM":
-                var layer = L.tileLayer(layerSettings.params.url, {});
-                this._addLayer(layer, layerId, layerSettings);
-                break;
-            case "TILE":
-                var layer = L.tileLayer(layerSettings.params.url, {});
-                this._addLayer(layer, layerId, layerSettings);
-                break;
-            case "WMS": {
-                var params = this.copyParams(layerSettings, /\burl\b/gi);
-                var layer = L.tileLayer.wms(layerSettings.params.url, params).addTo(map);
-                this._addLayer(layer, layerId, layerSettings);
-            }
-                break;
-            case "WFS": {
-                var layers = new L.GeoJSON().addTo(map);
-                var params = this.copyParams(layerSettings, /\b(url|style)\b/gi);
+        // console.log(this._layerSettingsById);
+        // console.log(this._layerContainersById);
+        if (this._layerContainersById.hasOwnProperty(layerId)) {
+            console.log("Layer [" + layerId + "] already exists. Skipping...")
+            // console.log(this._layerContainersById);
+            return;
+        }
+        this._layerSettingsById[layerId] = layerSettings;
+        var map = this._map;
+        var me = this;
+        switch (layerSettings.serviceType) {
+        case "OSM":
+            var layer = L.tileLayer(layerSettings.params.url, {});
+            this._addLayer(layer, layerId, layerSettings);
+            break;
+        case "TILE":
+            var layer = L.tileLayer(layerSettings.params.url, {});
+            this._addLayer(layer, layerId, layerSettings);
+            break;
+        case "WMS": {
+            var params = this.copyParams(layerSettings, /\burl\b/gi);
+            var layer = L.tileLayer.wms(layerSettings.params.url, params).addTo(map);
+            this._addLayer(layer, layerId, layerSettings);
+        }
+            break;
+        case "WFS": {
+            var layers = new L.GeoJSON().addTo(map);
+            var params = this.copyParams(layerSettings, /\b(url|style)\b/gi);
 
-                this._addLayer(layers, layerId, layerSettings);
-                var wfsHandler = function() {
-                    var bbox = map.getBounds().toBBoxString();
-                    if (layerSettings.coordinateSystem) {
-                        bbox += "," + layerSettings.coordinateSystem;
-                    }
-                    var customParams = {
-                        bbox : bbox,
-                    };
-                    var params2 = L.Util.extend(params, customParams);
-                    var wfsUrl = layerSettings.params.url + L.Util.getParamString(params2);
-                    $.ajax({
-                        url : wfsUrl,
-                        dataType : 'json',
-                        success : function(data) {
-                            layers.clearLayers();
-                            layers.addData(data);
-                            var style = layerSettings.params.style;
-                            if (style) {
-                                var styleObj = JSON.parse(style);
-                                layers.eachLayer(function(layer) {
-                                    layer.setStyle(styleObj);
-                                });
-                            }
-                            var icon = layerSettings.params.icon;
-                            if (icon) {
-                                layers.eachLayer(function(layer) {
-                                    layer.setIcon(icon);
-                                });
-                            }
-                            var onPopup = layerSettings.onPopup;
-                            var getType = {};
-                            if (onPopup && getType.toString.call(onPopup) === '[object Function]') {
-                                layers.eachLayer(function(layer) {
-                                    var func = layerSettings.onPopup(layer);
-                                    if (func) {
-                                        layer.bindPopup(func);
-                                    }
-                                });
-                            }
-                        },
-                        error : function() {
-                            console.error(arguments);
+            this._addLayer(layers, layerId, layerSettings);
+            var wfsHandler = function() {
+                var bbox = map.getBounds().toBBoxString();
+                if (layerSettings.coordinateSystem) {
+                    bbox += "," + layerSettings.coordinateSystem;
+                }
+                var customParams = {
+                    bbox : bbox,
+                };
+                var params2 = L.Util.extend(params, customParams);
+                var wfsUrl = layerSettings.params.url + L.Util.getParamString(params2);
+                $.ajax({
+                    url : wfsUrl,
+                    dataType : 'json',
+                    success : function(data) {
+                        layers.clearLayers();
+                        layers.addData(data);
+                        var style = layerSettings.params.style;
+                        if (style) {
+                            var styleObj = JSON.parse(style);
+                            layers.eachLayer(function(layer) {
+                                layer.setStyle(styleObj);
+                            });
                         }
-                    });
-                }
-                wfsHandler();
-                this._reloadHandlers[layerId + "__moveend"] = wfsHandler;
-                map.on("moveend", wfsHandler);
+                        var icon = layerSettings.params.icon;
+                        if (icon) {
+                            layers.eachLayer(function(layer) {
+                                layer.setIcon(icon);
+                            });
+                        }
+                        var onPopup = layerSettings.onPopup;
+                        var getType = {};
+                        if (onPopup && getType.toString.call(onPopup) === '[object Function]') {
+                            layers.eachLayer(function(layer) {
+                                var func = layerSettings.onPopup(layer);
+                                if (func) {
+                                    layer.bindPopup(func);
+                                }
+                            });
+                        }
+                    },
+                    error : function() {
+                        console.error(arguments);
+                    }
+                });
             }
-                break;
-            default:
-                if (this.options.layerBuilders != undefined && this.options.layerBuilders != null
-                        && this.options.layerBuilders.hasOwnProperty(layerSettings.serviceType)) {
-                    var layer = this.options.layerBuilders[layerSettings.serviceType](layerSettings);
-                    this._addLayer(layer, layerId, layerSettings);
-                }
-                break;
+            wfsHandler();
+            this._reloadHandlers[layerId + "__moveend"] = wfsHandler;
+            map.on("moveend", wfsHandler);
+        }
+            break;
+        default:
+            if (this.options.layerBuilders != undefined && this.options.layerBuilders != null
+                    && this.options.layerBuilders.hasOwnProperty(layerSettings.serviceType)) {
+                var layer = this.options.layerBuilders[layerSettings.serviceType](layerSettings);
+                this._addLayer(layer, layerId, layerSettings);
             }
-//        } else {
-//            console.log("Layer " + layerId + " already added. Skipping.");
-//        }
+            break;
+        }
     },
     _addLayer : function(layer, layerId, layerSettings) {
         if (layer) {
-            this._layers.push({
-                id : layerId,
-                layer : layer,
-                name : layerSettings.name,
-                settings : layerSettings
-            });
+            var max = 0;
+            for ( var propName in this._layerIndexesById) {
+                var curr = this._layerIndexesById[propName];
+                if (curr > max) {
+                    max = curr;
+                }
+            }
+            this._layerIndexesById[layerId] = max + 1;
             this._map.addLayer(layer);
         }
     },
@@ -230,37 +223,28 @@ L.Control.LayerTreeControl = L.Control.extend({
         }
         this.removeLayer(layerId);
     },
-    _getLayerIndex : function(layerId) {
-        for ( var i in this._layers) {
-            var layerContainer = this._layers[i];
-            if (layerContainer.id == layerId) {
-                return 1 * i;
-            }
-        }
-        return undefined;
-    },
     removeLayer : function(layerId) {
+        console.log("Removing layer [" + layerId + "]");
         if (this._layerSettingsById.hasOwnProperty(layerId)) {
             var map = this._map;
-            var layerIndex = this._getLayerIndex(layerId);
-            if (layerIndex != undefined) {
-                var layerContainer = this._layers[layerIndex];
-                var layer = layerContainer.layer;
-                map.removeLayer(layerContainer.layer);
-                delete layerContainer.layer;
-                delete layer;
-                delete layerContainer;
-                this._layers.splice(layerIndex, 1);
-            }
+            var layerIndex = this._layerIndexesById[layerId];
+            delete layerIndex;
+            delete this._layerIndexesById[layerId];
             if (this._reloadHandlers.hasOwnProperty(layerId + "__moveend")) {
                 map.off("moveend", this._reloadHandlers[layerId + "__moveend"]);
                 delete this._reloadHandlers[layerId + "__moveend"];
             }
-            // delete this._layerSettingsById[layerId];
+            if (this._layerContainersById.hasOwnProperty(layerId)) {
+                console.log("Deleting layerContainer for [" + layerId + "]")
+                var layerContainer = this._layerContainersById[layerId];
+                map.removeLayer(layerContainer);
+                delete this._layerContainersById[layerId];
+            }
         }
     },
     addLayer2 : function(layerSettings, parentLayerId) {
         // find parent layer,
+        console.log("AddLayer2 [" + parentLayerId + "][" + layerSettings.code + "]");
         var parentLayerSettings;
         if (parentLayerId) {
             parentLayerSettings = this._layerSettingsById[parentLayerId];
@@ -280,7 +264,12 @@ L.Control.LayerTreeControl = L.Control.extend({
 
         // add layer to parent
         let parentContainer = this.getLayerContainerById2(parentLayerId);
-        var parentContainerContent = (parentContainer.childNodes.length >= 2 && parentContainer.childNodes[1].className == className
+        console.log("AddLayer2 parentContainer [" + parentLayerId + "][" + layerSettings.code + "]");
+        console.log(parentContainer);
+        var parentContainerContent = (parentContainer //
+                && parentContainer.childNodes //
+                && parentContainer.childNodes.length >= 2 //
+        && parentContainer.childNodes[1].className == className //
                 + "-leaf-content") //
         ? parentContainer.childNodes[1] //
         : parentContainer;
@@ -319,6 +308,7 @@ L.Control.LayerTreeControl = L.Control.extend({
         if (!this._childLayers.hasOwnProperty(parentLayerId)) {
             this._childLayers[parentLayerId] = {};
         }
+        console.log("Setting child layer [" + parentLayerId + "][" + layerId + "]");
         this._childLayers[parentLayerId][layerId] = {}
     },
     removeChildLayer : function(layerId, parentLayerId) {
@@ -524,7 +514,8 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
                         }
                     }
                 }
-                // console.log("Leaf container:");
+                console.log("Leaf container for [" + leafSettings.code + "]");
+                // console.log(parentContainer);
                 // console.log(leafContainer);
                 // console.log(leafContainer.parentNode);
                 // console.log(leafContainer.parentNode.parentNode);
@@ -532,7 +523,7 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
                     console.log("Toggle children for [" + leafId + "]");
                     childrenVisibilityToggler.toggleChildrenVisibility(leafContainer.parentNode.parentNode, parentLeafSettings.openByDefault);
                 } else {
-                    console.log("Children toggle disabled for [" + leafId + "] ---");
+                    console.log("Children toggle disabled for [" + leafId + "]");
                 }
             }
             thePlugin.setLayerContainerById2(leafId, leafContainer);
@@ -564,7 +555,7 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
         checkboxWrapper.incrementChildrenCheckbox(parentLeafId, leafId, leafSettings);
     }
 
-    function createSINGLELeaf(leafSettings, leafTitle, parentLeafSettings, leafId, parentLeafId, toggleLayerSINGLE) {
+    function createSINGLELeaf(leafSettings, leafTitle, parentLeafSettings, leafId, parentLeafId, thePlugin, orderManager) {
         console.log("Leaf SINGLE [" + leafSettings.name + "]");
 
         function toggleLayerSINGLE(parentElementId, sourceElementId, leafTitle) {
@@ -679,58 +670,88 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
             layerManager.closeLayersContainer();
         }
     };
-    this.reorder = function(top, bottom) {
-        if (top > bottom) {
-            var layers = me._layers;
-            var s = layers[top];
-            for (var i = top; i > bottom; i--) {
-                layers[i] = layers[i - 1];
+    function findLayerIdByIndex(nextIndex) {
+        for ( var id in me._layerIndexesById) {
+            if (me._layerIndexesById[id] == nextIndex) {
+                return id;
             }
-            layers[bottom] = s;
-        } else if (top < bottom) {
-            var layers = me._layers;
-            var s = layers[top];
-            for (var i = top; i < bottom; i++) {
-                layers[i] = layers[i + 1];
-            }
-            layers[bottom] = s;
+        }
+    }
+    this.reorder = function(layerId, direction) {
+        var currentIndex = me._layerIndexesById[layerId];
+        var nextIndex = currentIndex + direction;
+        var nextLayerId = findLayerIdByIndex(nextIndex);
+        console.log("Reorder [" + layerId + "][" + direction + "]")
+        if (nextLayerId) {
+            me._layerIndexesById[layerId] = nextIndex;
+            me._layerIndexesById[nextLayerId] = currentIndex;
         }
     };
+    this.reorderIndexes = function(down, up) {
+        var downLayerId = findLayerIdByIndex(down);
+        if (!downLayerId) {
+            return;
+        }
+        var upLayerId = findLayerIdByIndex(up);
+        if (!upLayerId) {
+            return;
+        }
+        me._layerIndexesById[downLayerId] = up;
+        me._layerIndexesById[upLayerId] = down;
+    }
     this.fillOrders = function() {
         orderContainer.innerHTML = "";
-        var layers = me._layers;
-        for (var i = layers.length - 1; i > -1; i--) {
-            var layerContainer = layers[i];
-            if (layerContainer.layer.setZIndex != undefined) {
-                layerContainer.layer.setZIndex(i);
+        var layerIndexes = me._layerIndexesById;
+        var size = 0;
+        for ( var n in layerIndexes) {
+            size++;
+        }
+        var indexes = new Array();
+        for ( var layerId in layerIndexes) {
+            indexes[layerIndexes[layerId]] = layerId;
+        }
+        for ( var index in indexes) {
+            var layerId = indexes[index];
+            var layerIndex = layerIndexes[layerId];
+            var layerContainer = me._layerContainersById[layerId];
+            if (!layerContainer) { // TODO:
+                continue;
             }
+            // console.log(me)
+            // console.log(me._layerContainersById);
+            // console.log(layerId);
+            // console.log(layerContainer);
+            if (layerContainer.setZIndex != undefined) {
+                layerContainer.setZIndex(layerIndex);
+            }
+            var layerSettings = me._layerSettingsById[layerId];
             var row = L.DomUtil.create("div", className + "-order-row", orderContainer);
             var rowContent = L.DomUtil.create("div", className + "-order-row-content", row);
             var label = L.DomUtil.create("label", "", rowContent);
-            label.innerHTML = layerContainer.name;
+            label.innerHTML = layerSettings.name + " (" + layerIndex + " of " + size + ")";
 
-            if (i > 0) {
-                var down = L.DomUtil.create("span", className + "-order-down", rowContent);
+            if (layerIndex > 1) {
+                var down = L.DomUtil.create("span", className + "-order-up", rowContent);
                 L.DomEvent.on(down, "click", function(event) {
+                    console.log(event);
                     var elem = event.currentTarget ? event.currentTarget : me;
+                    console.log(elem);
                     var layerId = elem.parentElement.layerId;
-                    var index = me._getLayerIndex(layerId);
-                    me1.reorder(index - 1, index);
+                    me1.reorder(layerId, -1);
                     me1.fillOrders();
                 });
             }
-            if (i < layers.length - 1) {
-                var up = L.DomUtil.create("span", className + "-order-up", rowContent);
+            if (layerIndex < size) {
+                var up = L.DomUtil.create("span", className + "-order-down", rowContent);
                 L.DomEvent.on(up, "click", function(event) {
                     var elem = event.currentTarget ? event.currentTarget : me;
                     var layerId = elem.parentElement.layerId;
-                    var index = me._getLayerIndex(layerId);
-                    me1.reorder(index + 1, index);
+                    me1.reorder(layerId, 1);
                     me1.fillOrders();
                 });
             }
 
-            rowContent.layerId = layerContainer.id;
+            rowContent.layerId = layerId;
             rowContent.draggable = true;
             rowContent.droppable = true;
             rowContent.ondragstart = function(event) {
@@ -742,11 +763,8 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
                 var elem = event.currentTarget != undefined ? event.currentTarget : me;
                 var sourceId = elem.layerId;
                 var targetId = event.dataTransfer.getData("text/plain");
-                var sourceIndex = me._getLayerIndex(sourceId);
-                if (sourceIndex != undefined/*
-                                             * && targetIndex != undefined &&
-                                             * sourceIndex != targetIndex
-                                             */) {
+                var sourceIndex = me._layerIndexesById[sourceId];
+                if (sourceIndex != undefined) {
                     event.preventDefault();
                 }
             };
@@ -755,10 +773,10 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
                 var elem = event.currentTarget != undefined ? event.currentTarget : me;
                 var sourceId = elem.layerId;
                 var targetId = event.dataTransfer.getData("text/plain");
-                var sourceIndex = me._getLayerIndex(sourceId);
-                var targetIndex = me._getLayerIndex(targetId);
+                var sourceIndex = me._layerIndexesById[sourceId];
+                var targetIndex = me._layerIndexesById[targetId];
                 if (sourceIndex != undefined && targetIndex != undefined && sourceIndex != targetIndex) {
-                    me1.reorder(targetIndex, sourceIndex);
+                    me1.reorderIndexes(targetIndex, sourceIndex);
                     me1.fillOrders();
                 }
             }
@@ -768,7 +786,6 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
         orderContainer : orderContainer,
         orderToggleControl : orderToggleControl,
         layersContainer : layersContainer,
-        layers : me._layers,
         toggleOrder : this.toggleOrder,
         reorder : this.reorder,
         fillOrders : this.fillOrders,
