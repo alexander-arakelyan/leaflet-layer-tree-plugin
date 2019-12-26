@@ -296,11 +296,13 @@ L.Control.LayerTreeControl = L.Control.extend({
 	return leafId;
     },
     removeLayer2: function (layerId) {
-	// find layer
-	var layerSettings = this._findLayerSettings(layerId);
-
 	// remove layer
-	this._leafTraverser.removeLeaf(layerId);
+	console.log("Removing layer [" + layerId + "]");
+	this.removeLayerFromMap(layerId);
+	delete this._layerIndexesById[layerId];
+	console.log(this._layerMenuContainersById[layerId].remove());
+	delete this._layerMenuContainersById[layerId];
+	delete this._layerSettingsById[layerId];
     },
     getLayerContainerById2: function (layerId) {
 	console.log("LayerId [" + layerId + "]");
@@ -312,7 +314,7 @@ L.Control.LayerTreeControl = L.Control.extend({
     setLayerMenuContainerById2: function (layerId, layerMenuContainer) {
 	console.log("New leaf [" + layerId + "]");
 	if (this._layerMenuContainersById.hasOwnProperty(layerId)) {
-	    console.log("WARNING: LayerContainer for " + layerId + " already exists.");
+	    throw Error("LayerContainer for " + layerId + " already exists.");
 	}
 //	console.log(layerMenuContainer);
 	this._layerMenuContainersById[layerId] = layerMenuContainer;
@@ -544,8 +546,8 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
 	    thePlugin.setLayerMenuContainerById2(leafId, leafContainer);
 	    return leafId;
 	},
-	removeLeaf: function (leafId) {
-
+	removeLeaf: function (thePlugin, leafId) {
+	    // TODO:
 	}
     }
 
