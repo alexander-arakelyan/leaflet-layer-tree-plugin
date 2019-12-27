@@ -64,7 +64,7 @@
 	    ];
 
 	    // The Tree Control
-	    var theControl = new L.Control.LayerTreeControl({
+	    var theTreeControl = new L.Control.LayerTreeControl({
 		// layerTree: rootLayerSettings,
 		openByDefault: true,
 		layerBuilders: layerBuilders,
@@ -76,7 +76,7 @@
 	    }).addTo(map);
 
 
-	    var rootLayerId = theControl.addLayer2({
+	    var rootLayerId = theTreeControl.addLayerDynamically({
 		code: "root",
 		name: "All the Layers",
 		active: true,
@@ -88,7 +88,7 @@
 		params: {}
 	    });
 
-	    var baseLayerId = theControl.addLayer2({
+	    var baseLayerId = theTreeControl.addLayerDynamically({
 		code: "base",
 		name: "Base layers",
 		active: true,
@@ -101,7 +101,7 @@
 
 	    }, rootLayerId);
 
-	    var overlaysLayerId = theControl.addLayer2({
+	    var overlaysLayerId = theTreeControl.addLayerDynamically({
 		code: "overlays",
 		name: "Overlays",
 		active: true,
@@ -113,7 +113,7 @@
 		params: {}
 	    }, rootLayerId);
 
-	    var osmLayerId = theControl.addLayer2({
+	    var osmLayerId = theTreeControl.addLayerDynamically({
 		code: "osm",
 		name: "OpenStreetMap",
 		active: true,
@@ -127,7 +127,7 @@
 		}
 	    }, baseLayerId);
 
-	    var googleLayerId = theControl.addLayer2({
+	    var googleLayerId = theTreeControl.addLayerDynamically({
 		code: "google",
 		name: "Google",
 		active: true,
@@ -139,7 +139,7 @@
 		params: {}
 	    }, baseLayerId);
 
-	    var coastLineId = theControl.addLayer2({
+	    var coastLineId = theTreeControl.addLayerDynamically({
 		code: "50m_coastline",
 		name: "rsg:50m_coastline",
 		active: true,
@@ -163,7 +163,7 @@
 		}
 	    }, overlaysLayerId);
 
-	    var scotlandLayerId = theControl.addLayer2({
+	    var scotlandLayerId = theTreeControl.addLayerDynamically({
 		code: "MPA_SCOTLAND",
 		name: "rsg:MPA_SCOTLAND",
 		active: true,
@@ -188,7 +188,7 @@
 		}
 	    }, coastLineId);
 
-	    var shellFishCages = theControl.addLayer2({
+	    var shellFishCages = theTreeControl.addLayerDynamically({
 		code: "MMO_Fish_Shellfish_Cages_A",
 		name: "rsg:MMO_Fish_Shellfish_Cages_A",
 		active: true,
@@ -213,8 +213,8 @@
 		}
 	    }, coastLineId);
 
-//	    theControl.removeLayer2(shellFishCages);
-//	    theControl.removeLayer2(overlaysLayerId);
+//	    theTreeControl.removeLayerDynamically(shellFishCages);
+//	    theTreeControl.removeLayerDynamically(overlaysLayerId);
 
 
 	</script>

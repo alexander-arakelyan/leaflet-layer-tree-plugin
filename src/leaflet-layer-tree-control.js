@@ -110,12 +110,8 @@ L.Control.LayerTreeControl = L.Control.extend({
 	return params;
     },
     addLayerToMap: function (layerSettings, layerId) {
-	console.log("Adding layer [" + layerId + "]");
-	// console.log(this._layerSettingsById);
-	// console.log(this._layerContainersById);
 	if (this._mapLayersById.hasOwnProperty(layerId)) {
-	    console.log("Layer [" + layerId + "] already exists. Skipping...")
-	    // console.log(this._layerContainersById);
+	    console.warn("Layer [" + layerId + "] already exists. Skipping...")
 	    return;
 	}
 	this._layerSettingsById[layerId] = layerSettings;
@@ -207,7 +203,8 @@ L.Control.LayerTreeControl = L.Control.extend({
 	    return;
 	}
 	if (this._mapLayersById.hasOwnProperty(layerId)) {
-	    console.log("Map Layer " + layerId + " already exists! Skipping...");
+	    console.warn("Map Layer " + layerId + " already exists! Skipping...");
+	    return; // TODO:
 	}
 	var max = -1;
 	for (var propName in this._layerZIndexesById) {
@@ -221,11 +218,8 @@ L.Control.LayerTreeControl = L.Control.extend({
 	this._mapLayersById[layerId] = layer;
     },
     removeLayerFromMap: function (layerId) {
-	console.log("Removing child layers of [" + layerId + "]");
-	console.log(this._childLayers[layerId]);
 	if (this._childLayers.hasOwnProperty(layerId)) {
 	    var children = this._childLayers[layerId];
-	    console.log(children);
 	    for (var childId in children) {
 		this.removeLayerFromMap(childId);
 		this._removeLayerFromMap(childId);
@@ -234,7 +228,6 @@ L.Control.LayerTreeControl = L.Control.extend({
 	this._removeLayerFromMap(layerId);
     },
     _removeLayerFromMap: function (layerId) {
-	console.log("Removing layer [" + layerId + "]");
 	if (this._layerSettingsById.hasOwnProperty(layerId)) {
 	    var map = this._map;
 	    var layerIndex = this._layerZIndexesById[layerId];
@@ -245,9 +238,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 		delete this._reloadHandlers[layerId + "__moveend"];
 	    }
 	    if (this._layerMenuContainersById.hasOwnProperty(layerId)) {
-		console.log("Deleting Map Layer [" + layerId + "]")
 		var mapLayer = this._mapLayersById[layerId];
-//		console.log(mapLayer);
 		if (mapLayer) {
 		    map.removeLayer(mapLayer);
 		}
@@ -255,9 +246,8 @@ L.Control.LayerTreeControl = L.Control.extend({
 	    }
 	}
     },
-    addLayer2: function (layerSettings, parentLayerId) {
+    addLayerDynamically: function (layerSettings, parentLayerId) {
 	// find parent layer,
-	console.log("AddLayer2 [" + parentLayerId + "][" + layerSettings.code + "]");
 	var parentLayerSettings;
 	if (parentLayerId) {
 	    parentLayerSettings = this._layerSettingsById[parentLayerId];
@@ -277,8 +267,6 @@ L.Control.LayerTreeControl = L.Control.extend({
 
 	// add layer to parent
 	let parentContainer = this.getLayerContainerById2(parentLayerId);
-	console.log("AddLayer2 parentContainer [" + parentLayerId + "][" + layerSettings.code + "]");
-	console.log(parentContainer);
 	var parentContainerContent = (parentContainer //
 		&& parentContainer.childNodes //
 		&& parentContainer.childNodes.length >= 2 //
@@ -287,44 +275,32 @@ L.Control.LayerTreeControl = L.Control.extend({
 		? parentContainer.childNodes[1] //
 		: parentContainer;
 
-	// console.log(parentContainer);
 	var leafId = this._leafTraverser.addLeaf(parentLayerSettings, parentContainerContent, layerSettings, parentLayerId, 0);
-	console.log("Adding settings for [" + leafId + "]")
-	// console.log(layerSettings);
 	this._layerSettingsById[leafId] = layerSettings;
 	this.setChildLayer(parentLayerId, leafId);
 	return leafId;
     },
-    removeLayer2: function (layerId) {
+    removeLayerDynamically: function (layerId) {
 	// remove layer
-	console.log("Removing layer [" + layerId + "]");
 	this.removeLayerFromMap(layerId);
 	delete this._layerZIndexesById[layerId];
-	console.log(this._layerMenuContainersById[layerId].remove());
 	delete this._layerMenuContainersById[layerId];
 	delete this._layerSettingsById[layerId];
     },
     getLayerContainerById2: function (layerId) {
-	console.log("LayerId [" + layerId + "]");
-	// console.log(this._layerContainersById);
 	var layerContainer = this._layerMenuContainersById[layerId];
-	// console.log(layerContainer);
 	return layerContainer;
     },
     setLayerMenuContainerById2: function (layerId, layerMenuContainer) {
-	console.log("New leaf [" + layerId + "]");
 	if (this._layerMenuContainersById.hasOwnProperty(layerId)) {
 	    throw Error("LayerContainer for " + layerId + " already exists.");
 	}
-//	console.log(layerMenuContainer);
 	this._layerMenuContainersById[layerId] = layerMenuContainer;
     },
     setChildLayer: function (layerId, childLayerId) {
 	if (!this._childLayers.hasOwnProperty(layerId)) {
 	    this._childLayers[layerId] = {};
 	}
-	console.log("Setting child layer [" + layerId + "][" + childLayerId + "]");
-	console.log(this._childLayers);
 	this._childLayers[layerId][childLayerId] = true;
     },
     removeChildLayer: function (layerId, parentLayerId) {
@@ -493,12 +469,13 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
 	    return parentId + "_" + leafSettings.code + "_" + order;
 	},
 	addLeaf: function (parentLeafSettings, parentContainer, leafSettings, parentLeafId, leafOrder) {
-	    // console.log("ParentContainer:");
-	    // console.log(parentContainer);
 	    var leafContainer = L.DomUtil.create("div", className + "-leaf", parentContainer);
 	    var leafHeader = L.DomUtil.create("div", className + "-leaf-header", leafContainer);
 	    var leafTitle = L.DomUtil.create("span", className + "-leaf-title", leafHeader);
-	    createSwitcher(/* leafSettings, */parentLeafId, className, leafHeader);
+	    if (parentContainer.parentNode && parentContainer.parentNode.childNodes.length >= 1
+		    && parentContainer.parentNode.childNodes[0].className === className + "-leaf-header") {
+		createSwitcher(className, parentContainer.parentNode.childNodes[0]);
+	    }
 
 	    var leafId = this.buildLeafId(parentLeafId, leafSettings, leafOrder);
 	    if (leafSettings.active) {
@@ -530,16 +507,8 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
 			}
 		    }
 		}
-		console.log("Leaf container for [" + leafSettings.code + "]");
-		// console.log(parentContainer);
-		// console.log(leafContainer);
-		// console.log(leafContainer.parentNode);
-		// console.log(leafContainer.parentNode.parentNode);
 		if (leafContainer.parentNode && leafContainer.parentNode.parentNode) {
-		    console.log("Toggle children for [" + leafId + "]");
 		    childrenVisibilityToggler.toggleChildrenVisibility(leafContainer.parentNode.parentNode, parentLeafSettings.openByDefault);
-		} else {
-		    console.log("Children toggle disabled for [" + leafId + "]");
 		}
 	    }
 	    thePlugin.setChildLayer(parentLeafId, leafId);
@@ -551,30 +520,23 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
 	}
     }
 
-    function createSwitcher(/* leafSettings, */parentLeafId, className, leafHeader) {
-	// if (leafSettings.childLayers != undefined &&
-	// leafSettings.childLayers.length > 0)
-	{
-	    console.log("Adding switcher for [" + parentLeafId + "]");
+    function createSwitcher(className, leafHeader) {
+	if (leafHeader.getElementsByClassName(className + "-leaf-switcher-row").length == 0) {
 	    var leafSwitcherRow = L.DomUtil.create("span", className + "-leaf-switcher-row", leafHeader);
 	    var leafSwitcher = L.DomUtil.create("span", className + "-leaf-switcher", leafSwitcherRow);
 	    L.DomEvent.on(leafSwitcher, "click", function (event) {
 		var elem = event.srcElement != undefined ? event.srcElement : this;
-		console.log(elem.parentElement.parentElement.parentElement);
 		childrenVisibilityToggler.toggleChildrenVisibility(elem.parentElement.parentElement.parentElement);
 	    });
 	}
     }
 
     function createMULTIPLELeaf(leafId, parentLeafId, parentLeafSettings, leafTitle, leafSettings) {
-	console.log("Leaf MULTIPLE [" + leafSettings.name + "]");
 	checkboxWrapper.prepare(leafId, parentLeafId, parentLeafSettings, leafTitle, leafSettings, thePlugin, orderManager);
 	checkboxWrapper.incrementChildrenCheckbox(parentLeafId, leafId, leafSettings);
     }
 
     function createSINGLELeaf(leafSettings, leafTitle, parentLeafSettings, leafId, parentLeafId, thePlugin, orderManager) {
-	console.log("Leaf SINGLE [" + leafSettings.name + "]");
-
 	function toggleLayerSINGLE(parentElementId, sourceElementId, leafTitle) {
 	    thePlugin.removeLayerFromMap(parentElementId);
 	    thePlugin.addLayerToMap(leafSettings, sourceElementId);
@@ -609,14 +571,12 @@ function LeafletLayerTreeLeafTraverser(thePluginArg, className, childrenVisibili
 	    toggleLayerSINGLE(parentElementId, sourceElementId);
 	});
 	if (leafSettings.selectedByDefault) {
-	    console.log("Selected by default [" + leafId + "]");
 	    toggleLayerSINGLE(parentLeafId, leafId);
 	    checkbox.checked = "checked";
 	}
     }
 
     function createNONELeaf(leafSettings, leafTitle) {
-	console.log("Leaf NONE [" + leafSettings.name + "]");
 	leafTitle.innerHTML = "<label>" + leafSettings.name + "</label>";
     }
 }
@@ -625,25 +585,18 @@ function LeafletLayerTreeLayerChildrenVisibilityToggler(className, layerManager)
     this.className = className;
 
     function checkIfParentIsHeader(elem) {
-	// console.log(elem);
-	// console.log(elem.childNodes.length);
-	console.log(elem.className);
-	console.log(elem.childNodes[0].className);
 	var childNodesGreaterThanTwo = elem.childNodes.length >= 2;
 	if (!childNodesGreaterThanTwo) {
-	    console.log("Toggle: container < 2")
 	    return false;
 	}
 	var headerNodeExists = elem.childNodes[0].className == className + "-leaf-header";
 	var contentNodeExists = elem.childNodes[1].className == className + "-leaf-content";
-	console.log("Header node " + headerNodeExists + ", content node " + contentNodeExists);
 	return headerNodeExists && contentNodeExists;
     }
 
     // Layers
     return {
 	toggleChildrenVisibility: function (elem, open) {
-	    console.log("Toggling..." + open);
 	    if (!checkIfParentIsHeader(elem)) {
 		return;
 	    }
@@ -651,15 +604,12 @@ function LeafletLayerTreeLayerChildrenVisibilityToggler(className, layerManager)
 	    var content = elem.childNodes[1];
 	    var switcherRow = header.getElementsByClassName(className + "-leaf-switcher-row");
 	    if (switcherRow.length != 1) {
-		console.log("Switcher not found");
 		return;
 	    }
 	    var toggleButtons = switcherRow[0].getElementsByClassName(className + "-leaf-switcher");
 	    if (toggleButtons.length != 1) {
-		console.log("Toggle not found");
 		return;
 	    }
-	    console.log("Toggle");
 	    var toggleButton = toggleButtons[0];
 	    if (open === undefined) {
 		open = content.style.display == "none";
@@ -680,7 +630,6 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
     var me1 = this;
     function redefineIndexes(layerZIndexes) {
 	var indexesTmp = new Array();
-	console.log(layerZIndexes);
 	for (var layerId in layerZIndexes) {
 	    if (layerZIndexes[layerId] != undefined) {
 		indexesTmp[layerZIndexes[layerId]] = layerId;
@@ -704,7 +653,6 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 	}
     };
     this.reorder = function (layerId1, layerId2) {
-	console.log("Reordering [" + layerId1 + "][" + layerId2 + "]");
 	var tmpIndexes = redefineIndexes(me._layerZIndexesById);
 
 	var pos1;
@@ -741,61 +689,40 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 		if (min == undefined) {
 		    min = i;
 		    minLayerId = currentLayerId;
-		    console.log("min " + min + " " + currentLayerId);
 		} else {
 		    max = i;
 		    indexes.push(minLayerId);
-		    console.log("max " + max + " " + minLayerId);
 		}
 	    }
 	    if (min == undefined) {
-		console.log("push " + i + " " + tmpIndexes[i ]);
 		indexes.push(tmpIndexes[i]);
 	    } else if (max == undefined) {
-		console.log("push " + i + " " + tmpIndexes[i + 1]);
 		indexes.push(tmpIndexes[i + 1]);
 	    } else if (i > max) {
-		console.log("push " + i + " " + tmpIndexes[i]);
 		indexes.push(tmpIndexes[i]);
 	    }
 	}
 	indexes = dirFunct(indexes);
-//	console.log(indexes)
-//	var tmpIndex = me._layerZIndexesById[layerId1];
-//	me._layerZIndexesById[layerId1] = me._layerZIndexesById[layerId2];
-//	me._layerZIndexesById[layerId2] = tmpIndex;
 	for (var i = 0; i < indexes.length; i++) {
-//	    console.log("Indexes " + indexes[i]);
 	    me._layerZIndexesById[indexes[i]] = i;
-//	    console.log(me._layerZIndexesById);
 	}
     }
     ;
     this.fillOrders = function () {
 	orderContainer.innerHTML = "";
 	var indexes = redefineIndexes(me._layerZIndexesById);
-	console.log(indexes);
 	var size = indexes.length;
-//	console.log("Layer z-indexes");
-//	console.log(indexes);
 	for (var index in indexes) {
 	    var layerId = indexes[index];
 	    var layerContainer = me._layerMenuContainersById[layerId];
 	    if (!layerContainer) { // TODO:
 		continue;
 	    }
-	    // console.log(me)
-	    // console.log(me._layerContainersById);
-	    // console.log(layerId);
-	    // console.log(layerContainer);
-//	    console.log("Layer order [" + layerId + "][" + index + "]");
 	    var prevLayerId = null;
 	    var nextLayerId = null;
 	    var zIndex = index * 1;
 	    if (me._mapLayersById[layerId].setZIndex != undefined) {
-//		console.log("Setting zIndex [" + layerId + "][" + zIndex + "][" + me._mapLayersById[layerId].options.zIndex + "]");
 		me._mapLayersById[layerId].setZIndex(zIndex);
-//		console.log(me._mapLayersById[layerId]);
 	    }
 	    me._layerZIndexesById[layerId] = zIndex;
 	    var layerSettings = me._layerSettingsById[layerId];
@@ -822,8 +749,6 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 		    me1.fillOrders();
 		});
 	    }
-
-//	    console.log("Order Index-Prev-Next [" + index + "][" + prevLayerId + "][" + nextLayerId + "]");
 
 	    rowContent.layerId = layerId;
 	    rowContent.prevLayerId = prevLayerId;
