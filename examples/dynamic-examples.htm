@@ -64,7 +64,7 @@
 	    ];
 
 	    // The Tree Control
-	    var layerTree = new L.Control.LayerTreeControl({
+	    var theControl = new L.Control.LayerTreeControl({
 		// layerTree: rootLayerSettings,
 		openByDefault: true,
 		layerBuilders: layerBuilders,
@@ -76,7 +76,7 @@
 	    }).addTo(map);
 
 
-	    var rootLayerId = layerTree.addLayer2({
+	    var rootLayerId = theControl.addLayer2({
 		code: "root",
 		name: "All the Layers",
 		active: true,
@@ -88,7 +88,7 @@
 		params: {}
 	    });
 
-	    var baseLayerId = layerTree.addLayer2({
+	    var baseLayerId = theControl.addLayer2({
 		code: "base",
 		name: "Base layers",
 		active: true,
@@ -101,7 +101,7 @@
 
 	    }, rootLayerId);
 
-	    var overlaysLayerId = layerTree.addLayer2({
+	    var overlaysLayerId = theControl.addLayer2({
 		code: "overlays",
 		name: "Overlays",
 		active: true,
@@ -113,7 +113,7 @@
 		params: {}
 	    }, rootLayerId);
 
-	    var osmLayerId = layerTree.addLayer2({
+	    var osmLayerId = theControl.addLayer2({
 		code: "osm",
 		name: "OpenStreetMap",
 		active: true,
@@ -127,7 +127,7 @@
 		}
 	    }, baseLayerId);
 
-	    var googleLayerId = layerTree.addLayer2({
+	    var googleLayerId = theControl.addLayer2({
 		code: "google",
 		name: "Google",
 		active: true,
@@ -139,7 +139,7 @@
 		params: {}
 	    }, baseLayerId);
 
-	    var coastLineId = layerTree.addLayer2({
+	    var coastLineId = theControl.addLayer2({
 		code: "50m_coastline",
 		name: "rsg:50m_coastline",
 		active: true,
@@ -155,7 +155,7 @@
 		    request: "getFeature",
 		    service: "WFS",
 		    typeName: "rsg:50m_coastline",
-		    style: "{\"stroke\":true,\"fillColor\":\"violet\",\"border\":\"orange\",\"weight\":3,\"opacity\":0.5,\"color\":\"red\",\"dashArray\":\"5\",\"fillOpacity\":0.1}",
+		    style: "{\"stroke\":true,\"fillColor\":\"violet\",\"border\":\"orange\",\"weight\":2,\"opacity\":1,\"color\":\"red\",\"dashArray\":\"3\",\"fillOpacity\":1}",
 		    version: "1.1.0",
 		    outputFormat: "application/json",
 		    url: "https://rsg.pml.ac.uk/geoserver/wfs",
@@ -163,11 +163,11 @@
 		}
 	    }, overlaysLayerId);
 
-	    var scotlandLayerId = layerTree.addLayer2({
+	    var scotlandLayerId = theControl.addLayer2({
 		code: "MPA_SCOTLAND",
 		name: "rsg:MPA_SCOTLAND",
 		active: true,
-		selectedByDefault: true,
+		selectedByDefault: false,
 		openByDefault: true,
 		childLayers: [],
 		selectType: "MULTIPLE",
@@ -188,11 +188,11 @@
 		}
 	    }, coastLineId);
 
-	    var shellFishCages = layerTree.addLayer2({
+	    var shellFishCages = theControl.addLayer2({
 		code: "MMO_Fish_Shellfish_Cages_A",
 		name: "rsg:MMO_Fish_Shellfish_Cages_A",
 		active: true,
-		selectedByDefault: false,
+		selectedByDefault: true,
 		openByDefault: true,
 		childLayers: [],
 		selectType: "MULTIPLE",
@@ -205,6 +205,7 @@
 		    request: "getFeature",
 		    service: "WFS",
 		    typeName: "rsg:MMO_Fish_Shellfish_Cages_A",
+		    style: "{\"stroke\":true,\"fillColor\":\"blue\",\"border\":\"violet\",\"weight\":3,\"opacity\":1,\"color\":\"orange\",\"dashArray\":\"1\",\"fillOpacity\":1}",
 		    version: "1.1.1",
 		    outputFormat: "application/json",
 		    url: "https://rsg.pml.ac.uk/geoserver/wfs",

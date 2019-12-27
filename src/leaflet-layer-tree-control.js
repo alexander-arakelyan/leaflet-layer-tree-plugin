@@ -17,7 +17,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 	// this._layers = new Array();
 	this._layerSettingsById = {};
 	this._layerMenuContainersById = {};
-	this._layerIndexesById = {};
+	this._layerZIndexesById = {};
 	this._mapLayersById = {};
 	this._childLayers = {};
 	this._reloadHandlers = {};
@@ -210,13 +210,13 @@ L.Control.LayerTreeControl = L.Control.extend({
 	    console.log("Map Layer " + layerId + " already exists! Skipping...");
 	}
 	var max = 0;
-	for (var propName in this._layerIndexesById) {
-	    var curr = this._layerIndexesById[propName];
+	for (var propName in this._layerZIndexesById) {
+	    var curr = this._layerZIndexesById[propName];
 	    if (curr > max) {
 		max = curr;
 	    }
 	}
-	this._layerIndexesById[layerId] = max + 1;
+	this._layerZIndexesById[layerId] = max + 1;
 	this._map.addLayer(layer);
 	this._mapLayersById[layerId] = layer;
     },
@@ -237,9 +237,9 @@ L.Control.LayerTreeControl = L.Control.extend({
 	console.log("Removing layer [" + layerId + "]");
 	if (this._layerSettingsById.hasOwnProperty(layerId)) {
 	    var map = this._map;
-	    var layerIndex = this._layerIndexesById[layerId];
+	    var layerIndex = this._layerZIndexesById[layerId];
 	    delete layerIndex;
-	    delete this._layerIndexesById[layerId];
+	    delete this._layerZIndexesById[layerId];
 	    if (this._reloadHandlers.hasOwnProperty(layerId + "__moveend")) {
 		map.off("moveend", this._reloadHandlers[layerId + "__moveend"]);
 		delete this._reloadHandlers[layerId + "__moveend"];
@@ -299,7 +299,7 @@ L.Control.LayerTreeControl = L.Control.extend({
 	// remove layer
 	console.log("Removing layer [" + layerId + "]");
 	this.removeLayerFromMap(layerId);
-	delete this._layerIndexesById[layerId];
+	delete this._layerZIndexesById[layerId];
 	console.log(this._layerMenuContainersById[layerId].remove());
 	delete this._layerMenuContainersById[layerId];
 	delete this._layerSettingsById[layerId];
@@ -678,6 +678,20 @@ function LeafletLayerTreeLayerChildrenVisibilityToggler(className, layerManager)
 
 function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleControl, layersContainer, me, layerManager) {
     var me1 = this;
+    const zIndexOffset = 1;
+    function redefineIndexes(layerZIndexes) {
+	var indexesTmp = new Array();
+	for (var layerId in layerZIndexes) {
+	    if (layerZIndexes[layerId]) {
+		indexesTmp[layerZIndexes[layerId] - zIndexOffset] = layerId;
+	    }
+	}
+	var indexes = new Array();
+	for (var indexTmp in indexesTmp) {
+	    indexes.push(indexesTmp[indexTmp]);
+	}
+	return indexes;
+    }
     this.toggleOrder = function () {
 	if (this.isOrderContainerOpen()) {
 	    this.closeOrderToggleControl();
@@ -689,49 +703,20 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 	    layerManager.closeLayersContainer();
 	}
     };
-    function findLayerIdByIndex(nextIndex) {
-	for (var id in me._layerIndexesById) {
-	    if (me._layerIndexesById[id] == nextIndex) {
-		return id;
-	    }
-	}
-    }
-    this.reorder = function (layerId, direction) {
-	var currentIndex = me._layerIndexesById[layerId];
-	var nextIndex = currentIndex + direction;
-	var nextLayerId = findLayerIdByIndex(nextIndex);
-	console.log("Reorder [" + layerId + "][" + direction + "]")
-	if (nextLayerId) {
-	    me._layerIndexesById[layerId] = nextIndex;
-	    me._layerIndexesById[nextLayerId] = currentIndex;
-	}
+    this.reorderLayers = function (layerId1, layerId2) {
+	console.log("Reordering [" + layerId1 + "][" + layerId2 + "]");
+	var tmpIndex = me._layerZIndexesById[layerId1];
+	me._layerZIndexesById[layerId1] = me._layerZIndexesById[layerId2];
+	me._layerZIndexesById[layerId2] = tmpIndex;
     };
-    this.reorderIndexes = function (down, up) {
-	var downLayerId = findLayerIdByIndex(down);
-	if (!downLayerId) {
-	    return;
-	}
-	var upLayerId = findLayerIdByIndex(up);
-	if (!upLayerId) {
-	    return;
-	}
-	me._layerIndexesById[downLayerId] = up;
-	me._layerIndexesById[upLayerId] = down;
-    }
     this.fillOrders = function () {
 	orderContainer.innerHTML = "";
-	var layerIndexes = me._layerIndexesById;
-	var size = 0;
-	for (var n in layerIndexes) {
-	    size++;
-	}
-	var indexes = new Array();
-	for (var layerId in layerIndexes) {
-	    indexes[layerIndexes[layerId]] = layerId;
-	}
+	var indexes = redefineIndexes(me._layerZIndexesById);
+	var size = indexes.length;
+	console.log("Layer z-indexes");
+	console.log(indexes);
 	for (var index in indexes) {
 	    var layerId = indexes[index];
-	    var layerIndex = layerIndexes[layerId];
 	    var layerContainer = me._layerMenuContainersById[layerId];
 	    if (!layerContainer) { // TODO:
 		continue;
@@ -740,37 +725,46 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 	    // console.log(me._layerContainersById);
 	    // console.log(layerId);
 	    // console.log(layerContainer);
-	    if (layerContainer.setZIndex != undefined) {
-		layerContainer.setZIndex(layerIndex);
+//	    console.log("Layer order [" + layerId + "][" + index + "]");
+	    var prevLayerId = null;
+	    var nextLayerId = null;
+	    var zIndex = (index * 1 + zIndexOffset) * 100;
+	    if (me._mapLayersById[layerId].setZIndex != undefined) {
+		console.log("Setting zIndex [" + layerId + "][" + zIndex + "][" + me._mapLayersById[layerId].options.zIndex + "]");
+		me._mapLayersById[layerId].setZIndex(zIndex);
+		console.log(me._mapLayersById[layerId]);
 	    }
+	    me._layerZIndexesById[layerId] = zIndex;
 	    var layerSettings = me._layerSettingsById[layerId];
 	    var row = L.DomUtil.create("div", className + "-order-row", orderContainer);
 	    var rowContent = L.DomUtil.create("div", className + "-order-row-content", row);
 	    var label = L.DomUtil.create("label", "", rowContent);
-	    label.innerHTML = layerSettings.name + " (" + layerIndex + " of " + size + ")";
+	    label.innerHTML = layerSettings.name + " (" + zIndex + " of " + size + ")";
 
-	    if (layerIndex > 1) {
+	    if (index > 0) {
+		prevLayerId = indexes[index * 1 - 1];
 		var down = L.DomUtil.create("span", className + "-order-up", rowContent);
 		L.DomEvent.on(down, "click", function (event) {
-		    console.log(event);
 		    var elem = event.currentTarget ? event.currentTarget : me;
-		    console.log(elem);
-		    var layerId = elem.parentElement.layerId;
-		    me1.reorder(layerId, -1);
+		    me1.reorderLayers(elem.parentElement.layerId, elem.parentElement.prevLayerId);
 		    me1.fillOrders();
 		});
 	    }
-	    if (layerIndex < size) {
+	    if (index < size - 1) {
+		nextLayerId = indexes[index * 1 + 1];
 		var up = L.DomUtil.create("span", className + "-order-down", rowContent);
 		L.DomEvent.on(up, "click", function (event) {
 		    var elem = event.currentTarget ? event.currentTarget : me;
-		    var layerId = elem.parentElement.layerId;
-		    me1.reorder(layerId, 1);
+		    me1.reorderLayers(elem.parentElement.layerId, elem.parentElement.nextLayerId);
 		    me1.fillOrders();
 		});
 	    }
 
+	    console.log("Order Index-Prev-Next [" + index + "][" + prevLayerId + "][" + nextLayerId + "]");
+
 	    rowContent.layerId = layerId;
+	    rowContent.prevLayerId = prevLayerId;
+	    rowContent.nextLayerId = nextLayerId;
 	    rowContent.draggable = true;
 	    rowContent.droppable = true;
 	    rowContent.ondragstart = function (event) {
@@ -782,7 +776,7 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 		var elem = event.currentTarget != undefined ? event.currentTarget : me;
 		var sourceId = elem.layerId;
 		var targetId = event.dataTransfer.getData("text/plain");
-		var sourceIndex = me._layerIndexesById[sourceId];
+		var sourceIndex = me._layerZIndexesById[sourceId];
 		if (sourceIndex != undefined) {
 		    event.preventDefault();
 		}
@@ -792,10 +786,8 @@ function LeafletLayerTreeOrderManager(className, orderContainer, orderToggleCont
 		var elem = event.currentTarget != undefined ? event.currentTarget : me;
 		var sourceId = elem.layerId;
 		var targetId = event.dataTransfer.getData("text/plain");
-		var sourceIndex = me._layerIndexesById[sourceId];
-		var targetIndex = me._layerIndexesById[targetId];
-		if (sourceIndex != undefined && targetIndex != undefined && sourceIndex != targetIndex) {
-		    me1.reorderIndexes(targetIndex, sourceIndex);
+		if (sourceId && targetId) {
+		    me1.reorderLayers(sourceId, targetId);
 		    me1.fillOrders();
 		}
 	    }
